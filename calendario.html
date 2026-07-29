@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calendário Corporativo - DGF</title>
+    <!-- Biblioteca html2canvas para tirar o screenshot -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
             --primary-color: #0056b3;
@@ -134,7 +136,7 @@
         }
 
         .summary-item.clickable-summary:hover {
-            background-color: #eaf2f8; /* Azul clarinho indicando clique */
+            background-color: #eaf2f8; 
         }
 
         .summary-color-dot {
@@ -169,6 +171,37 @@
         }
 
         .main-title strong { font-weight: bold; }
+
+        /* Barra de Ações (Screenshot / Backup) */
+        .action-toolbar {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn-action {
+            background-color: #fff;
+            color: var(--navy-blue);
+            border: 1px solid var(--border-color);
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: all 0.2s;
+        }
+
+        .btn-action:hover {
+            background-color: var(--navy-blue);
+            color: #fff;
+            border-color: var(--navy-blue);
+        }
 
         .calendar-header { display: flex; justify-content: space-between; align-items: center; }
 
@@ -228,7 +261,7 @@
 
         .event-label.recesso { background-color: var(--recess-bg); color: var(--recess-color); }
         .day.has-event { border-color: var(--event-color) !important; background-color: #fff9f9 !important; }
-        .day.has-recesso { border-color: var(--recess-color) !important; background-color: #fbf9ff !important; }
+        .day.has-recesso { border-color: var(--recesso-color) !important; background-color: #fbf9ff !important; }
 
         .label-blue { background-color: var(--pers-blue-bg); color: var(--pers-blue-color); }
         .label-green { background-color: var(--pers-green-bg); color: var(--pers-green-color); }
@@ -324,9 +357,16 @@
 </head>
 <body>
 
-    <div class="main-wrapper">
+    <div class="main-wrapper" id="captureArea">
         <div class="top-highlight">
             <h1 class="main-title">Calendário <strong>DGF</strong></h1>
+            <!-- Barra de Ações com Screenshot e Backup -->
+            <div class="action-toolbar">
+                <button class="btn-action" onclick="tirarScreenshot()">📸 Baixar Imagem</button>
+                <button class="btn-action" onclick="exportarDados()">💾 Exportar Anotações</button>
+                <button class="btn-action" onclick="document.getElementById('fileInput').click()">📂 Importar Anotações</button>
+                <input type="file" id="fileInput" style="display: none;" accept=".json,.txt" onchange="importarDados(event)">
+            </div>
         </div>
 
         <div class="content-wrapper">
@@ -420,6 +460,72 @@
                 opt.innerText = time;
                 inputHorario.appendChild(opt);
             }
+        }
+
+        // === FUNÇÃO DE SCREENSHOT (html2canvas) ===
+        function tirarScreenshot() {
+            const elemento = document.getElementById('captureArea');
+            
+            // Oculta temporariamente o botão flutuante se estiver visível
+            const btnFlutuanteEl = document.getElementById('btnFlutuante');
+            const displayOriginal = btnFlutuanteEl.style.display;
+            btnFlutuanteEl.style.display = 'none';
+
+            html2canvas(elemento, { 
+                scale: 2, // Melhora a nitidez da imagem
+                backgroundColor: '#f4f7f6',
+                useCORS: true
+            }).then(canvas => {
+                btnFlutuanteEl.style.display = displayOriginal;
+                
+                const link = document.createElement('a');
+                const mesNome = meses[mesAtual].toLowerCase();
+                link.download = `calendario-dgf-${mesNome}-${anoAtual}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            }).catch(err => {
+                btnFlutuanteEl.style.display = displayOriginal;
+                alert('Erro ao gerar a imagem. Tente novamente.');
+                console.error(err);
+            });
+        }
+
+        // === FUNÇÕES DE EXPORTAR E IMPORTAR DADOS (BACKUP) ===
+        function exportarDados() {
+            const dados = localStorage.getItem('dgfAnotacoes') || '[]';
+            const blob = new Blob([dados], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            const dataHoje = new Date().toISOString().slice(0, 10);
+            link.download = `backup-anotacoes-dgf-${dataHoje}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importarDados(event) {
+            const arquivo = event.target.files[0];
+            if (!arquivo) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const dadosImportados = JSON.parse(e.target.result);
+                    if (Array.isArray(dadosImportados)) {
+                        if (confirm(`Deseja importar ${dadosImportados.length} anotações? Isso substituirá suas anotações atuais.`)) {
+                            localStorage.setItem('dgfAnotacoes', JSON.stringify(dadosImportados));
+                            renderizarCalendario(mesAtual, anoAtual);
+                            alert('Anotações importadas com sucesso!');
+                        }
+                    } else {
+                        alert('O arquivo selecionado não possui um formato válido.');
+                    }
+                } catch (err) {
+                    alert('Erro ao ler o arquivo. Certifique-se de que é um arquivo de backup válido.');
+                }
+                event.target.value = ''; // Reseta o input file
+            };
+            reader.readAsText(arquivo);
         }
 
         // === DADOS CORPORATIVOS FIXOS ===
@@ -662,7 +768,6 @@
             }
         };
 
-        // Permite abrir modal e gerenciar pelo clique no sumário (apenas pessoal)
         function renderizarSumarioEspecifico(eventos, containerElement, mensagemVazio, ano, isClicavel = false) {
             containerElement.innerHTML = ''; 
 
@@ -755,7 +860,6 @@
                             </div>
                         `;
 
-                        // Adiciona clique no item se for a lista pessoal
                         if (isClicavel) {
                             itemDiv.classList.add('clickable-summary');
                             itemDiv.title = 'Clique para gerenciar esta anotação';
@@ -770,7 +874,6 @@
                             itemDiv.addEventListener('click', () => {
                                 datasSelecionadas = arrDates;
                                 
-                                // Seleciona visualmente no calendário
                                 document.querySelectorAll('.day').forEach(el => {
                                     if(el.hasAttribute('data-date')) {
                                         if(datasSelecionadas.includes(el.getAttribute('data-date'))) {
@@ -807,7 +910,6 @@
             pessoaisDoAno.sort((a, b) => a.data.localeCompare(b.data));
 
             renderizarSumarioEspecifico(corporativosDoAno, summaryContentLeft, `Nenhum feriado ou recesso registrado em ${ano}.`, ano, false);
-            // Passa 'true' no último parâmetro para a coluna das anotações poder receber clique
             renderizarSumarioEspecifico(pessoaisDoAno, summaryContentRight, `Nenhuma anotação registrada em ${ano}.`, ano, true);
         }
 
@@ -852,7 +954,6 @@
                 const diaFormatado = String(dia).padStart(2, '0');
                 const dataString = `${ano}-${mesFormatado}-${diaFormatado}`;
                 
-                // Registra a data no DOM para os itens clicáveis do sumário localizarem visualmente
                 dayDiv.setAttribute('data-date', dataString);
                 
                 if (datasSelecionadas.includes(dataString)) {
