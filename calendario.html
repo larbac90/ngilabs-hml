@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calendário</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+body{
+    background:#f4f6f9;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+
+.calendario{
+    width:420px;
+    background:#fff;
+    border-radius:15px;
+    box-shadow:0 10px 25px rgba(0,0,0,.15);
+    overflow:hidden;
+}
+
+.topo{
+    background:#2b7cff;
+    color:white;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:15px;
+}
+
+.topo button{
+    background:transparent;
+    border:none;
+    color:white;
+    font-size:24px;
+    cursor:pointer;
+    padding:5px 10px;
+}
+
+#mesAno{
+    font-size:22px;
+    font-weight:bold;
+}
+
+.diasSemana,
+.dias{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+}
+
+.diasSemana div{
+    padding:12px;
+    text-align:center;
+    font-weight:bold;
+    background:#eceff3;
+}
+
+.dias div{
+    height:60px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.dias div:hover{
+    background:#d9e8ff;
+}
+
+.outroMes{
+    color:#bbb;
+}
+
+.hoje{
+    background:#2b7cff;
+    color:white;
+    border-radius:50%;
+    width:40px;
+    height:40px;
+    margin:auto;
+}
+</style>
+
+</head>
+<body>
+
+<div class="calendario">
+
+    <div class="topo">
+        <button onclick="mudarMes(-1)">❮</button>
+        <div id="mesAno"></div>
+        <button onclick="mudarMes(1)">❯</button>
+    </div>
+
+    <div class="diasSemana">
+        <div>Dom</div>
+        <div>Seg</div>
+        <div>Ter</div>
+        <div>Qua</div>
+        <div>Qui</div>
+        <div>Sex</div>
+        <div>Sáb</div>
+    </div>
+
+    <div class="dias" id="dias"></div>
+
+</div>
+
+<script>
+
+const meses = [
+"Janeiro","Fevereiro","Março","Abril","Maio","Junho",
+"Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"
+];
+
+let data = new Date();
+
+function gerarCalendario(){
+
+    const ano = data.getFullYear();
+    const mes = data.getMonth();
+
+    document.getElementById("mesAno").innerHTML =
+        meses[mes] + " " + ano;
+
+    const dias = document.getElementById("dias");
+    dias.innerHTML = "";
+
+    const primeiroDia = new Date(ano, mes, 1).getDay();
+    const ultimoDia = new Date(ano, mes + 1, 0).getDate();
+
+    const ultimoMesAnterior = new Date(ano, mes, 0).getDate();
+
+    // Dias do mês anterior
+    for(let i=primeiroDia;i>0;i--){
+        dias.innerHTML += `<div class="outroMes">${ultimoMesAnterior-i+1}</div>`;
+    }
+
+    const hoje = new Date();
+
+    // Dias do mês atual
+    for(let i=1;i<=ultimoDia;i++){
+
+        let classe = "";
+
+        if(
+            i===hoje.getDate() &&
+            mes===hoje.getMonth() &&
+            ano===hoje.getFullYear()
+        ){
+            classe="hoje";
+        }
+
+        dias.innerHTML += `<div><span class="${classe}">${i}</span></div>`;
+    }
+
+    const total = primeiroDia + ultimoDia;
+    const faltam = 42-total;
+
+    // Dias do próximo mês
+    for(let i=1;i<=faltam;i++){
+        dias.innerHTML += `<div class="outroMes">${i}</div>`;
+    }
+
+}
+
+function mudarMes(valor){
+    data.setMonth(data.getMonth()+valor);
+    gerarCalendario();
+}
+
+gerarCalendario();
+
+</script>
+
+</body>
+</html>
