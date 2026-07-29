@@ -1,188 +1,958 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Calendário</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendário Corporativo - DGF</title>
+    <style>
+        :root {
+            --primary-color: #0056b3;
+            --secondary-color: #f4f7f6;
+            --text-color: #333;
+            --border-color: #ddd;
+            
+            /* Título Principal e Novo Fundo */
+            --navy-blue: #001f3f;
+            --top-bg-color: #eaf4fb; 
+            
+            /* Cores Nativas */
+            --event-color: #e74c3c;
+            --event-bg: #fadbd8;
+            --recess-color: #8e44ad;
+            --recess-bg: #ebdef0;
+            
+            /* 6 Cores Personalizadas para as Anotações */
+            --pers-blue-color: #2980b9;    --pers-blue-bg: #d6eaf8;
+            --pers-green-color: #27ae60;   --pers-green-bg: #d5f5e3;
+            --pers-orange-color: #d35400;  --pers-orange-bg: #fae5d3;
+            --pers-yellow-color: #b7950b;  --pers-yellow-bg: #fcf3cf;
+            --pers-teal-color: #16a085;    --pers-teal-bg: #d1f2eb;
+            --pers-pink-color: #d81b60;    --pers-pink-bg: #f8bbd0;
+        }
 
-<style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:Arial,Helvetica,sans-serif;
-}
+        * {
+            font-family: 'Segoe UI', sans-serif;
+            box-sizing: border-box;
+        }
 
-body{
-    background:#f4f6f9;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    height:100vh;
-}
+        body {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; 
+            min-height: 100vh;
+            margin: 0;
+            padding: 40px 20px; 
+        }
 
-.calendario{
-    width:420px;
-    background:#fff;
-    border-radius:15px;
-    box-shadow:0 10px 25px rgba(0,0,0,.15);
-    overflow:hidden;
-}
+        /* --- Layout Flexível para as TRÊS colunas --- */
+        .main-wrapper {
+            width: 100%;
+            max-width: 1400px; 
+            display: flex;
+            flex-direction: column;
+        }
 
-.topo{
-    background:#2b7cff;
-    color:white;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:15px;
-}
+        .content-wrapper {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            width: 100%;
+        }
 
-.topo button{
-    background:transparent;
-    border:none;
-    color:white;
-    font-size:24px;
-    cursor:pointer;
-    padding:5px 10px;
-}
+        /* Caixa Central: Calendário */
+        .calendar-container {
+            background: #fff;
+            flex: 2.5; 
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+            padding: 20px;
+            min-width: 0; 
+            order: 2; 
+        }
 
-#mesAno{
-    font-size:22px;
-    font-weight:bold;
-}
+        /* Caixas Laterais: Sumários (Esquerda e Direita) */
+        .summary-container {
+            background: #fff;
+            flex: 1; 
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 20px;
+            min-width: 240px;
+            max-height: 85vh; 
+            overflow-y: auto; 
+            position: sticky;
+            top: 20px;
+        }
+        
+        #summaryLeft { order: 1; }  
+        #summaryRight { order: 3; } 
+        
+        .summary-container::-webkit-scrollbar { width: 6px; }
+        .summary-container::-webkit-scrollbar-thumb { background-color: #ccc; border-radius: 10px; }
 
-.diasSemana,
-.dias{
-    display:grid;
-    grid-template-columns:repeat(7,1fr);
-}
+        .summary-title {
+            color: var(--navy-blue);
+            font-size: 18px;
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-color);
+        }
 
-.diasSemana div{
-    padding:12px;
-    text-align:center;
-    font-weight:bold;
-    background:#eceff3;
-}
+        .summary-month-header {
+            color: var(--primary-color);
+            font-size: 14px;
+            text-transform: uppercase;
+            font-weight: bold;
+            margin-top: 20px;
+            margin-bottom: 8px;
+            padding-bottom: 3px;
+            border-bottom: 1px solid #eee;
+        }
 
-.dias div{
-    height:60px;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    cursor:pointer;
-    transition:.2s;
-}
+        .summary-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-size: 12px;
+            line-height: 1.4;
+        }
 
-.dias div:hover{
-    background:#d9e8ff;
-}
+        /* Destaque para itens clicáveis no sumário */
+        .summary-item.clickable-summary {
+            cursor: pointer;
+            padding: 4px;
+            margin-left: -4px;
+            margin-right: -4px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
 
-.outroMes{
-    color:#bbb;
-}
+        .summary-item.clickable-summary:hover {
+            background-color: #eaf2f8; /* Azul clarinho indicando clique */
+        }
 
-.hoje{
-    background:#2b7cff;
-    color:white;
-    border-radius:50%;
-    width:40px;
-    height:40px;
-    margin:auto;
-}
-</style>
+        .summary-color-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
 
+        .footer-text {
+            text-align: center;
+            color: var(--navy-blue);
+            font-size: 13px;
+            font-weight: bold; 
+            margin-top: 15px;
+        }
+
+        .top-highlight {
+            background-color: var(--top-bg-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .main-title {
+            font-size: 36px; 
+            color: var(--navy-blue);
+            text-align: center;
+            margin: 0; 
+            font-weight: normal;
+        }
+
+        .main-title strong { font-weight: bold; }
+
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; }
+
+        .calendar-header h2 {
+            margin: 0; color: var(--primary-color); font-size: 24px; text-transform: uppercase; text-align: center; flex: 1; 
+        }
+
+        .header-divider { border: none; height: 2px; background-color: var(--border-color); margin: 15px 0; } 
+
+        .btn {
+            background-color: var(--primary-color); color: #fff; border: none; padding: 8px 15px;
+            min-width: 120px; border-radius: 4px; cursor: pointer; font-size: 16px; transition: background 0.3s;
+        }
+        .btn:hover { background-color: #004494; }
+        
+        .legenda {
+            display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin-bottom: 15px; font-size: 13px; font-weight: bold;
+        }
+        
+        .legenda-item { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; }
+        .legenda-cor { width: 14px; height: 14px; border-radius: 3px; }
+
+        .legenda-multicolor {
+            background: linear-gradient(135deg, 
+                var(--pers-blue-color) 0%, var(--pers-blue-color) 16.6%, 
+                var(--pers-green-color) 16.6%, var(--pers-green-color) 33.3%, 
+                var(--pers-orange-color) 33.3%, var(--pers-orange-color) 50%, 
+                var(--pers-yellow-color) 50%, var(--pers-yellow-color) 66.6%, 
+                var(--pers-teal-color) 66.6%, var(--pers-teal-color) 83.3%, 
+                var(--pers-pink-color) 83.3%, var(--pers-pink-color) 100%);
+        }
+
+        .instrucao-ctrl { font-size: 12px; color: #666; font-style: italic; font-weight: normal; margin-left: 5px; }
+
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+
+        .day-name { text-align: center; font-weight: bold; color: var(--primary-color); padding: 5px 0; border-bottom: 1px solid var(--border-color); }
+
+        .day {
+            height: 90px; border: 1px solid var(--border-color); border-radius: 4px; padding: 4px;
+            display: flex; flex-direction: column; background: #fafafa; transition: all 0.2s; cursor: pointer; overflow-y: auto; position: relative;
+        }
+        
+        .day::-webkit-scrollbar { display: none; }
+        .day:hover { background: #f0f0f0; }
+        .day.weekend { background: #e6e6e6; }
+        .day.weekend:hover { background: #dcdcdc; }
+
+        .day.empty { background: transparent !important; border: 1px solid transparent !important; cursor: default; box-shadow: none !important; }
+        .day.selected-day { box-shadow: inset 0 0 0 3px var(--navy-blue) !important; background-color: #eaf2f8 !important; }
+        .day-number { font-weight: bold; font-size: 14px; margin-bottom: 3px; pointer-events: none; }
+
+        .event-label {
+            background-color: var(--event-bg); color: var(--event-color); font-size: 11px; padding: 3px 4px; 
+            border-radius: 3px; margin-top: 2px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none;
+        }
+
+        .event-label.recesso { background-color: var(--recess-bg); color: var(--recess-color); }
+        .day.has-event { border-color: var(--event-color) !important; background-color: #fff9f9 !important; }
+        .day.has-recesso { border-color: var(--recess-color) !important; background-color: #fbf9ff !important; }
+
+        .label-blue { background-color: var(--pers-blue-bg); color: var(--pers-blue-color); }
+        .label-green { background-color: var(--pers-green-bg); color: var(--pers-green-color); }
+        .label-orange { background-color: var(--pers-orange-bg); color: var(--pers-orange-color); }
+        .label-yellow { background-color: var(--pers-yellow-bg); color: var(--pers-yellow-color); }
+        .label-teal { background-color: var(--pers-teal-bg); color: var(--pers-teal-color); }
+        .label-pink { background-color: var(--pers-pink-bg); color: var(--pers-pink-color); }
+
+        .day.has-pers-blue { border-color: var(--pers-blue-color) !important; }
+        .day.has-pers-green { border-color: var(--pers-green-color) !important; }
+        .day.has-pers-orange { border-color: var(--pers-orange-color) !important; }
+        .day.has-pers-yellow { border-color: var(--pers-yellow-color) !important; }
+        .day.has-pers-teal { border-color: var(--pers-teal-color) !important; }
+        .day.has-pers-pink { border-color: var(--pers-pink-color) !important; }
+
+        /* Estilos do Popup (Modal) */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center; z-index: 1000;
+        }
+
+        .modal-content {
+            background: #fff; padding: 25px; border-radius: 8px; width: 90%; max-width: 400px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); text-align: center;
+        }
+
+        .modal-content h3 { margin-top: 0; color: var(--navy-blue); font-size: 20px; margin-bottom: 15px;}
+        .lista-anotacoes { margin-bottom: 15px; text-align: left; max-height: 120px; overflow-y: auto; }
+        .anotacao-item {
+            display: flex; justify-content: space-between; align-items: center; background: #f9f9f9; padding: 6px 10px; margin-bottom: 5px; border-radius: 4px; border-left: 4px solid #ccc;
+        }
+        .anotacao-acoes button { background: none; border: none; cursor: pointer; font-size: 12px; font-weight: bold; margin-left: 5px; padding: 2px 5px; }
+        .btn-editar-item { color: var(--primary-color); }
+        .btn-apagar-item { color: var(--event-color); }
+
+        .form-divisor { border-top: 1px dashed var(--border-color); margin: 15px 0; display: none; }
+
+        .input-group { display: flex; gap: 10px; margin-bottom: 15px; }
+        .modal-input { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 14px; margin-bottom: 0; }
+
+        .color-picker { display: flex; justify-content: space-between; margin-bottom: 20px; padding: 0 10px; }
+        .color-option { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: transform 0.2s; }
+        .color-option:hover { transform: scale(1.1); }
+        .color-option.selected { border-color: #333; transform: scale(1.1); }
+
+        .modal-actions { display: flex; justify-content: space-between; gap: 10px; }
+        .modal-actions button { flex: 1; padding: 10px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-cancel { background: #e0e0e0; color: #333; }
+        .btn-cancel:hover { background: #ccc; }
+        .btn-save { background: var(--primary-color); color: #fff; }
+        .btn-save:hover { background: #004494; }
+
+        .btn-apagar-massa {
+            width: 100%; background: #e74c3c; color: #fff; border: none; padding: 10px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-bottom: 15px; display: none;
+        }
+        .btn-apagar-massa:hover { background: #c0392b; }
+
+        #btnFlutuante {
+            display: none; position: fixed; bottom: 30px; right: 30px; background: var(--navy-blue); color: #fff; border: none;
+            padding: 15px 25px; border-radius: 50px; font-size: 16px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; z-index: 900; transition: transform 0.2s;
+        }
+        #btnFlutuante:hover { transform: scale(1.05); }
+
+        /* ================================================= */
+        /* MEDIA QUERIES - RESPONSIVIDADE PARA TELAS MENORES */
+        /* ================================================= */
+        @media (max-width: 1100px) {
+            .content-wrapper { flex-direction: column; }
+            .calendar-container { order: 1; width: 100%; } 
+            #summaryLeft { order: 2; width: 100%; position: static; max-height: none; }
+            #summaryRight { order: 3; width: 100%; position: static; max-height: none; }
+        }
+
+        @media (max-width: 600px) {
+            body { padding: 15px 10px; }
+            .calendar-container, .summary-container { padding: 15px 10px; }
+            .top-highlight { padding: 15px 10px; } 
+            .main-title { font-size: 28px; margin-bottom: 0; }
+            .calendar-header h2 { font-size: 18px; }
+            .btn { min-width: 80px; padding: 6px 10px; font-size: 14px; }
+            .legenda { font-size: 11px; gap: 8px; }
+            .legenda-cor { width: 12px; height: 12px; }
+            .instrucao-ctrl { font-size: 10px; width: 100%; text-align: center; margin-left: 0; margin-top: 3px; }
+            .legenda-item:last-child { justify-content: center; }
+            .day-name { font-size: 12px; padding: 4px 0; }
+            .day { height: 75px; padding: 2px; } 
+            .day-number { font-size: 12px; margin-bottom: 2px; }
+            .event-label { font-size: 9px; padding: 2px; margin-top: 1px; }
+            .calendar-grid { gap: 3px; }
+            #btnFlutuante { bottom: 20px; right: 20px; padding: 12px 20px; font-size: 14px; }
+        }
+
+    </style>
 </head>
 <body>
 
-<div class="calendario">
+    <div class="main-wrapper">
+        <div class="top-highlight">
+            <h1 class="main-title">Calendário <strong>DGF</strong></h1>
+        </div>
 
-    <div class="topo">
-        <button onclick="mudarMes(-1)">❮</button>
-        <div id="mesAno"></div>
-        <button onclick="mudarMes(1)">❯</button>
+        <div class="content-wrapper">
+            
+            <!-- ESQUERDA: Sumário de Feriados e Recessos -->
+            <div class="summary-container" id="summaryLeft">
+                <h3 class="summary-title" id="summaryTitleLeft">Feriados e Recessos</h3>
+                <div id="summaryContentLeft">
+                    <!-- Gerado via JS -->
+                </div>
+            </div>
+
+            <!-- CENTRO: Calendário Principal -->
+            <div class="calendar-container">
+                
+                <div class="calendar-header">
+                    <button class="btn" id="prevBtn">&laquo; Anterior</button>
+                    <h2 id="monthYearTitle">Carregando...</h2>
+                    <button class="btn" id="nextBtn">Próximo &raquo;</button>
+                </div>
+                
+                <hr class="header-divider">
+                
+                <div class="legenda">
+                    <div class="legenda-item"><div class="legenda-cor" style="background-color: var(--event-color);"></div> Feriado</div>
+                    <div class="legenda-item"><div class="legenda-cor" style="background-color: var(--recess-color);"></div> Recesso</div>
+                    <div class="legenda-item">
+                        <div class="legenda-cor legenda-multicolor"></div> Suas Anotações 
+                        <span class="instrucao-ctrl">| 💡 Dica: Segure <strong>CTRL</strong> e clique nos dias para multi-seleção.</span>
+                    </div>
+                </div>
+                
+                <div class="calendar-grid" id="calendarDays"></div>
+            </div>
+
+            <!-- DIREITA: Sumário de Anotações Pessoais -->
+            <div class="summary-container" id="summaryRight">
+                <h3 class="summary-title" id="summaryTitleRight">Suas Anotações</h3>
+                <div id="summaryContentRight">
+                    <!-- Gerado via JS -->
+                </div>
+            </div>
+            
+        </div> 
+
+        <div class="footer-text">NGI Labs - DGF</div>
+    </div> 
+
+    <button id="btnFlutuante">Gerenciar X datas</button>
+
+    <div class="modal-overlay" id="eventoModal">
+        <div class="modal-content">
+            <h3 id="modalDateTitle">Adicionar Anotação</h3>
+            <div id="areaAnotacoesAntigas">
+                <div class="lista-anotacoes" id="listaAnotacoesHTML"></div>
+                <div class="form-divisor" id="modalDivisor"></div>
+            </div>
+            <button id="btnApagarMassa" class="btn-apagar-massa">🗑️ Apagar anotações das X datas</button>
+            
+            <div class="input-group">
+                <input type="text" id="eventoTexto" class="modal-input" maxlength="22" placeholder="Digite aqui (máx. 22 letras)" autocomplete="off" style="flex: 2;">
+                <!-- Select de horário -->
+                <select id="eventoHorario" class="modal-input" style="flex: 1; padding: 10px 5px;">
+                    <option value="">Sem horário</option>
+                </select>
+            </div>
+            
+            <div class="color-picker">
+                <div class="color-option selected" data-color="blue" style="background-color: var(--pers-blue-color);"></div>
+                <div class="color-option" data-color="green" style="background-color: var(--pers-green-color);"></div>
+                <div class="color-option" data-color="orange" style="background-color: var(--pers-orange-color);"></div>
+                <div class="color-option" data-color="yellow" style="background-color: var(--pers-yellow-color);"></div>
+                <div class="color-option" data-color="teal" style="background-color: var(--pers-teal-color);"></div>
+                <div class="color-option" data-color="pink" style="background-color: var(--pers-pink-color);"></div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" id="btnCancelar">Cancelar</button>
+                <button class="btn-save" id="btnSalvar">Salvar</button>
+            </div>
+        </div>
     </div>
 
-    <div class="diasSemana">
-        <div>Dom</div>
-        <div>Seg</div>
-        <div>Ter</div>
-        <div>Qua</div>
-        <div>Qui</div>
-        <div>Sex</div>
-        <div>Sáb</div>
-    </div>
-
-    <div class="dias" id="dias"></div>
-
-</div>
-
-<script>
-
-const meses = [
-"Janeiro","Fevereiro","Março","Abril","Maio","Junho",
-"Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"
-];
-
-let data = new Date();
-
-function gerarCalendario(){
-
-    const ano = data.getFullYear();
-    const mes = data.getMonth();
-
-    document.getElementById("mesAno").innerHTML =
-        meses[mes] + " " + ano;
-
-    const dias = document.getElementById("dias");
-    dias.innerHTML = "";
-
-    const primeiroDia = new Date(ano, mes, 1).getDay();
-    const ultimoDia = new Date(ano, mes + 1, 0).getDate();
-
-    const ultimoMesAnterior = new Date(ano, mes, 0).getDate();
-
-    // Dias do mês anterior
-    for(let i=primeiroDia;i>0;i--){
-        dias.innerHTML += `<div class="outroMes">${ultimoMesAnterior-i+1}</div>`;
-    }
-
-    const hoje = new Date();
-
-    // Dias do mês atual
-    for(let i=1;i<=ultimoDia;i++){
-
-        let classe = "";
-
-        if(
-            i===hoje.getDate() &&
-            mes===hoje.getMonth() &&
-            ano===hoje.getFullYear()
-        ){
-            classe="hoje";
+    <script>
+        // === PREENCHER O SELECT DE HORÁRIOS ===
+        const inputHorario = document.getElementById('eventoHorario');
+        for (let h = 0; h < 24; h++) {
+            for (let m of ['00', '30']) {
+                let time = `${String(h).padStart(2, '0')}:${m}`;
+                let opt = document.createElement('option');
+                opt.value = time;
+                opt.innerText = time;
+                inputHorario.appendChild(opt);
+            }
         }
 
-        dias.innerHTML += `<div><span class="${classe}">${i}</span></div>`;
-    }
+        // === DADOS CORPORATIVOS FIXOS ===
+        const eventosCorporativos = [
+            { data: '2026-01-01', titulo: 'Confraternização Universal', tipo: 'feriado' },
+            { data: '2026-02-16', titulo: 'Carnaval', tipo: 'feriado' },
+            { data: '2026-02-17', titulo: 'Carnaval', tipo: 'feriado' },
+            { data: '2026-02-18', titulo: 'Cinzas', tipo: 'feriado' },
+            { data: '2026-03-06', titulo: 'Data Magna de Pernambuco', tipo: 'feriado' },
+            { data: '2026-04-02', titulo: 'Semana Santa', tipo: 'feriado' },
+            { data: '2026-04-03', titulo: 'Paixão de Cristo', tipo: 'feriado' },
+            { data: '2026-04-05', titulo: 'Páscoa', tipo: 'feriado' },
+            { data: '2026-04-21', titulo: 'Tiradentes', tipo: 'feriado' },
+            { data: '2026-05-01', titulo: 'Dia do Trabalho', tipo: 'feriado' },
+            { data: '2026-06-22', titulo: 'Corpus Christi (Transferido)', tipo: 'feriado' },
+            { data: '2026-06-24', titulo: 'São João', tipo: 'feriado' },
+            { data: '2026-08-10', titulo: 'Dia dos Cursos Jurídicos (Antecipado)', tipo: 'feriado' },
+            { data: '2026-09-07', titulo: 'Independência do Brasil', tipo: 'feriado' },
+            { data: '2026-10-12', titulo: 'Nossa Senhora Aparecida', tipo: 'feriado' },
+            { data: '2026-10-30', titulo: 'Dia do Servidor Público (Transferido)', tipo: 'feriado' },
+            { data: '2026-11-02', titulo: 'Finados', tipo: 'feriado' },
+            { data: '2026-11-15', titulo: 'Proclamação da República', tipo: 'feriado' },
+            { data: '2026-11-20', titulo: 'Consciência Negra', tipo: 'feriado' },
+            { data: '2026-12-08', titulo: 'Nossa Sra. da Conceição / Dia da Justiça', tipo: 'feriado' },
+            { data: '2026-12-25', titulo: 'Natal', tipo: 'feriado' },
+            { data: '2026-01-01', titulo: 'Recesso', tipo: 'recesso' },
+            { data: '2026-01-02', titulo: 'Recesso', tipo: 'recesso' },
+            { data: '2026-01-03', titulo: 'Recesso', tipo: 'recesso' },
+            { data: '2026-01-04', titulo: 'Recesso', tipo: 'recesso' },
+            { data: '2026-01-05', titulo: 'Recesso', tipo: 'recesso' },
+            { data: '2026-01-06', titulo: 'Recesso', tipo: 'recesso' },
+            { data: '2026-06-23', titulo: 'Recesso', tipo: 'recesso' },
+            { data: '2026-06-24', titulo: 'Recesso', tipo: 'recesso' },
+            { data: '2026-06-25', titulo: 'Recesso', tipo: 'recesso' },
+            { data: '2026-06-26', titulo: 'Recesso', tipo: 'recesso' },
+            { data: '2026-06-27', titulo: 'Recesso', tipo: 'recesso' },
+            { data: '2026-06-28', titulo: 'Recesso', tipo: 'recesso' },
+            { data: '2026-06-29', titulo: 'Recesso', tipo: 'recesso' },
+            { data: '2026-06-30', titulo: 'Recesso', tipo: 'recesso' },
+            { data: '2026-12-20', titulo: 'Recesso', tipo: 'recesso' },
+            { data: '2026-12-21', titulo: 'Recesso', tipo: 'recesso' },
+            { data: '2026-12-22', titulo: 'Recesso', tipo: 'recesso' },
+            { data: '2026-12-23', titulo: 'Recesso', tipo: 'recesso' },
+            { data: '2026-12-24', titulo: 'Recesso', tipo: 'recesso' },
+            { data: '2026-12-25', titulo: 'Recesso', tipo: 'recesso' },
+            { data: '2026-12-26', titulo: 'Recesso', tipo: 'recesso' },
+            { data: '2026-12-27', titulo: 'Recesso', tipo: 'recesso' },
+            { data: '2026-12-28', titulo: 'Recesso', tipo: 'recesso' },
+            { data: '2026-12-29', titulo: 'Recesso', tipo: 'recesso' },
+            { data: '2026-12-30', titulo: 'Recesso', tipo: 'recesso' },
+            { data: '2026-12-31', titulo: 'Recesso', tipo: 'recesso' },
+        ];
 
-    const total = primeiroDia + ultimoDia;
-    const faltam = 42-total;
+        let dadosLocais = JSON.parse(localStorage.getItem('dgfAnotacoes')) || [];
+        let migrou = false;
+        dadosLocais.forEach((a, i) => { if (!a.id) { a.id = Date.now().toString() + '_' + i; migrou = true; } });
+        if (migrou) localStorage.setItem('dgfAnotacoes', JSON.stringify(dadosLocais));
 
-    // Dias do próximo mês
-    for(let i=1;i<=faltam;i++){
-        dias.innerHTML += `<div class="outroMes">${i}</div>`;
-    }
+        const dataAtual = new Date();
+        let anoAtual = dataAtual.getFullYear();
+        let mesAtual = dataAtual.getMonth();
 
-}
+        const monthYearTitle = document.getElementById('monthYearTitle');
+        const calendarDays = document.getElementById('calendarDays');
+        const summaryTitleLeft = document.getElementById('summaryTitleLeft');
+        const summaryContentLeft = document.getElementById('summaryContentLeft');
+        const summaryTitleRight = document.getElementById('summaryTitleRight');
+        const summaryContentRight = document.getElementById('summaryContentRight');
+        
+        const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+        const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
-function mudarMes(valor){
-    data.setMonth(data.getMonth()+valor);
-    gerarCalendario();
-}
+        const modal = document.getElementById('eventoModal');
+        const btnSalvar = document.getElementById('btnSalvar');
+        const btnCancelar = document.getElementById('btnCancelar');
+        const btnFlutuante = document.getElementById('btnFlutuante');
+        const btnApagarMassa = document.getElementById('btnApagarMassa');
+        const inputTexto = document.getElementById('eventoTexto');
+        const modalDateTitle = document.getElementById('modalDateTitle');
+        const colorOptions = document.querySelectorAll('.color-option');
+        
+        let datasSelecionadas = []; 
+        let corSelecionada = 'blue';
+        let eventoEmEdicaoId = null;
 
-gerarCalendario();
+        colorOptions.forEach(opt => {
+            opt.addEventListener('click', function() {
+                colorOptions.forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+                corSelecionada = this.getAttribute('data-color');
+            });
+        });
 
-</script>
+        btnCancelar.addEventListener('click', () => modal.style.display = 'none');
 
+        function atualizarBotaoFlutuante() {
+            if (datasSelecionadas.length > 1) {
+                btnFlutuante.innerText = `Gerenciar ${datasSelecionadas.length} datas`;
+                btnFlutuante.style.display = 'block';
+            } else {
+                btnFlutuante.style.display = 'none';
+            }
+        }
+
+        function abrirModalParaAdicionarOuEditar() {
+            eventoEmEdicaoId = null;
+            inputTexto.value = ''; 
+            inputHorario.value = ''; 
+            btnSalvar.innerText = 'Salvar';
+            
+            corSelecionada = 'blue';
+            colorOptions.forEach(o => o.classList.toggle('selected', o.getAttribute('data-color') === 'blue'));
+            
+            const areaAnotacoes = document.getElementById('areaAnotacoesAntigas');
+            const listaHTML = document.getElementById('listaAnotacoesHTML');
+            const divisor = document.getElementById('modalDivisor');
+
+            areaAnotacoes.style.display = 'none';
+            listaHTML.innerHTML = '';
+            divisor.style.display = 'none';
+
+            let anotacoes = JSON.parse(localStorage.getItem('dgfAnotacoes')) || [];
+
+            if (datasSelecionadas.length === 1) {
+                btnApagarMassa.style.display = 'none'; 
+                const dataStr = datasSelecionadas[0];
+                const [ano, mes, dia] = dataStr.split('-');
+                modalDateTitle.innerText = `Data: ${dia}/${mes}/${ano}`;
+
+                const eventosDesteDia = anotacoes.filter(a => a.data === dataStr);
+                
+                if (eventosDesteDia.length > 0) {
+                    areaAnotacoes.style.display = 'block';
+                    divisor.style.display = 'block';
+                    
+                    let html = '<div style="font-size: 13px; font-weight: bold; margin-bottom: 8px;">Anotações Existentes:</div>';
+                    eventosDesteDia.forEach(e => {
+                        let borderColor = `var(--pers-${e.cor}-color)`;
+                        
+                        let tituloLista = e.titulo;
+                        if (e.horario) tituloLista += ` (${e.horario})`;
+
+                        html += `
+                            <div class="anotacao-item" style="border-left-color: ${borderColor}">
+                                <span style="font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 170px;">${tituloLista}</span>
+                                <div class="anotacao-acoes">
+                                    <button type="button" class="btn-editar-item" onclick="prepararEdicao('${e.id}')">Editar</button>
+                                    <button type="button" class="btn-apagar-item" onclick="apagarEvento('${e.id}')">Apagar</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    listaHTML.innerHTML = html;
+                }
+            } else {
+                modalDateTitle.innerText = `Gerenciar ${datasSelecionadas.length} datas`;
+                btnApagarMassa.innerText = `🗑️ Apagar anotações das ${datasSelecionadas.length} datas`;
+                btnApagarMassa.style.display = 'block'; 
+            }
+
+            modal.style.display = 'flex';
+            inputTexto.focus();
+        }
+
+        btnFlutuante.addEventListener('click', abrirModalParaAdicionarOuEditar);
+        
+        btnApagarMassa.addEventListener('click', () => {
+            if (confirm(`Tem certeza que deseja APAGAR TODAS as suas anotações das ${datasSelecionadas.length} datas selecionadas?`)) {
+                let anotacoes = JSON.parse(localStorage.getItem('dgfAnotacoes')) || [];
+                anotacoes = anotacoes.filter(a => !datasSelecionadas.includes(a.data));
+                localStorage.setItem('dgfAnotacoes', JSON.stringify(anotacoes));
+                
+                datasSelecionadas = [];
+                atualizarBotaoFlutuante();
+                modal.style.display = 'none';
+                renderizarCalendario(mesAtual, anoAtual); 
+            }
+        });
+
+        btnSalvar.addEventListener('click', () => {
+            const texto = inputTexto.value.trim();
+            const horario = inputHorario.value;
+
+            if (texto !== '') {
+                let anotacoes = JSON.parse(localStorage.getItem('dgfAnotacoes')) || [];
+                
+                if (eventoEmEdicaoId) {
+                    const index = anotacoes.findIndex(a => a.id === eventoEmEdicaoId);
+                    if (index > -1) {
+                        anotacoes[index].titulo = texto;
+                        anotacoes[index].horario = horario;
+                        anotacoes[index].cor = corSelecionada;
+                    }
+                } else {
+                    datasSelecionadas.forEach((dataAlvo, i) => {
+                        anotacoes.push({
+                            id: Date.now().toString() + '_' + i,
+                            data: dataAlvo,
+                            titulo: texto,
+                            tipo: 'pessoal',
+                            horario: horario,
+                            cor: corSelecionada
+                        });
+                    });
+                }
+                
+                localStorage.setItem('dgfAnotacoes', JSON.stringify(anotacoes));
+                
+                datasSelecionadas = [];
+                atualizarBotaoFlutuante();
+                modal.style.display = 'none';
+                renderizarCalendario(mesAtual, anoAtual); 
+            }
+        });
+
+        window.prepararEdicao = function(id) {
+            let anotacoes = JSON.parse(localStorage.getItem('dgfAnotacoes')) || [];
+            const evento = anotacoes.find(a => a.id === id);
+            
+            if (evento) {
+                eventoEmEdicaoId = id;
+                inputTexto.value = evento.titulo;
+                inputHorario.value = evento.horario || '';
+                
+                corSelecionada = evento.cor;
+                colorOptions.forEach(o => { o.classList.toggle('selected', o.getAttribute('data-color') === corSelecionada); });
+                
+                btnSalvar.innerText = 'Atualizar Anotação';
+                inputTexto.focus();
+            }
+        };
+
+        window.apagarEvento = function(id) {
+            if (confirm("Tem certeza que deseja apagar esta anotação?")) {
+                let anotacoes = JSON.parse(localStorage.getItem('dgfAnotacoes')) || [];
+                anotacoes = anotacoes.filter(a => a.id !== id);
+                localStorage.setItem('dgfAnotacoes', JSON.stringify(anotacoes));
+                renderizarCalendario(mesAtual, anoAtual);
+                abrirModalParaAdicionarOuEditar(); 
+            }
+        };
+
+        // Permite abrir modal e gerenciar pelo clique no sumário (apenas pessoal)
+        function renderizarSumarioEspecifico(eventos, containerElement, mensagemVazio, ano, isClicavel = false) {
+            containerElement.innerHTML = ''; 
+
+            if (eventos.length === 0) {
+                containerElement.innerHTML = `<p style="text-align: center; color: #777; font-size: 13px; margin-top: 30px;">${mensagemVazio}</p>`;
+                return;
+            }
+
+            const eventosPorMes = {};
+            eventos.forEach(evento => {
+                const parts = evento.data.split('-');
+                const mesIdx = parseInt(parts[1], 10) - 1; 
+                const dia = parts[2];
+                
+                if (!eventosPorMes[mesIdx]) eventosPorMes[mesIdx] = [];
+                
+                let tituloCompleto = evento.titulo;
+                if (evento.data === '2026-06-22' && evento.tipo !== 'pessoal') tituloCompleto = 'Corpus Christi (Transferido)';
+                if (evento.data === '2026-08-10' && evento.tipo !== 'pessoal') tituloCompleto = 'Dia dos Cursos Jurídicos';
+                if (evento.data === '2026-10-30' && evento.tipo !== 'pessoal') tituloCompleto = 'Dia do Servidor (Transferido)';
+                if (evento.data === '2026-12-08' && evento.tipo !== 'pessoal') tituloCompleto = 'Nossa Sra. Conceição/Justiça';
+                
+                if (evento.tipo === 'pessoal' && evento.horario) {
+                    tituloCompleto += ` (${evento.horario})`;
+                }
+                
+                eventosPorMes[mesIdx].push({ ...evento, diaStr: dia, tituloDisplay: tituloCompleto });
+            });
+
+            for (let i = 0; i < 12; i++) {
+                if (eventosPorMes[i] && eventosPorMes[i].length > 0) {
+                    
+                    const mesDiv = document.createElement('div');
+                    const mesHeader = document.createElement('div');
+                    mesHeader.classList.add('summary-month-header');
+                    mesHeader.innerText = meses[i];
+                    mesDiv.appendChild(mesHeader);
+
+                    let sequencias = [];
+
+                    eventosPorMes[i].forEach(evento => {
+                        let diaNum = parseInt(evento.diaStr, 10);
+                        
+                        let corPonto = '';
+                        if (evento.tipo === 'feriado') corPonto = 'var(--event-color)';
+                        else if (evento.tipo === 'recesso') corPonto = 'var(--recess-color)';
+                        else if (evento.tipo === 'pessoal') corPonto = `var(--pers-${evento.cor}-color)`;
+
+                        let seqExistente = sequencias.find(s => 
+                            s.tituloDisplay === evento.tituloDisplay && 
+                            s.corPonto === corPonto && 
+                            s.fim === diaNum - 1
+                        );
+
+                        if (seqExistente) {
+                            seqExistente.fim = diaNum; 
+                        } else {
+                            let seqMesmoDia = sequencias.find(s => 
+                                s.tituloDisplay === evento.tituloDisplay && 
+                                s.corPonto === corPonto && 
+                                s.fim === diaNum
+                            );
+                            
+                            if (!seqMesmoDia) {
+                                sequencias.push({
+                                    inicio: diaNum,
+                                    fim: diaNum,
+                                    tituloDisplay: evento.tituloDisplay,
+                                    corPonto: corPonto
+                                });
+                            }
+                        }
+                    });
+
+                    sequencias.sort((a, b) => a.inicio - b.inicio);
+
+                    sequencias.forEach(seq => {
+                        const itemDiv = document.createElement('div');
+                        itemDiv.classList.add('summary-item');
+
+                        let strDias = String(seq.inicio).padStart(2, '0');
+                        if (seq.inicio !== seq.fim) {
+                            strDias = `${String(seq.inicio).padStart(2, '0')} a ${String(seq.fim).padStart(2, '0')}`;
+                        }
+
+                        itemDiv.innerHTML = `
+                            <div class="summary-color-dot" style="background-color: ${seq.corPonto};"></div>
+                            <div style="flex: 1;">
+                                <strong>${strDias}</strong> - ${seq.tituloDisplay}
+                            </div>
+                        `;
+
+                        // Adiciona clique no item se for a lista pessoal
+                        if (isClicavel) {
+                            itemDiv.classList.add('clickable-summary');
+                            itemDiv.title = 'Clique para gerenciar esta anotação';
+                            
+                            let arrDates = [];
+                            for(let d = seq.inicio; d <= seq.fim; d++) {
+                                let m = String(i + 1).padStart(2, '0');
+                                let day = String(d).padStart(2, '0');
+                                arrDates.push(`${ano}-${m}-${day}`);
+                            }
+                            
+                            itemDiv.addEventListener('click', () => {
+                                datasSelecionadas = arrDates;
+                                
+                                // Seleciona visualmente no calendário
+                                document.querySelectorAll('.day').forEach(el => {
+                                    if(el.hasAttribute('data-date')) {
+                                        if(datasSelecionadas.includes(el.getAttribute('data-date'))) {
+                                            el.classList.add('selected-day');
+                                        } else {
+                                            el.classList.remove('selected-day');
+                                        }
+                                    }
+                                });
+                                
+                                atualizarBotaoFlutuante();
+                                abrirModalParaAdicionarOuEditar();
+                            });
+                        }
+
+                        mesDiv.appendChild(itemDiv);
+                    });
+
+                    containerElement.appendChild(mesDiv);
+                }
+            }
+        }
+
+        function renderizarResumosAno(ano) {
+            summaryTitleLeft.innerText = `Feriados e Recessos (${ano})`;
+            summaryTitleRight.innerText = `Suas Anotações (${ano})`;
+
+            const anotacoesPessoais = JSON.parse(localStorage.getItem('dgfAnotacoes')) || [];
+            
+            const corporativosDoAno = eventosCorporativos.filter(e => e.data.startsWith(ano.toString()));
+            const pessoaisDoAno = anotacoesPessoais.filter(e => e.data.startsWith(ano.toString()));
+
+            corporativosDoAno.sort((a, b) => a.data.localeCompare(b.data));
+            pessoaisDoAno.sort((a, b) => a.data.localeCompare(b.data));
+
+            renderizarSumarioEspecifico(corporativosDoAno, summaryContentLeft, `Nenhum feriado ou recesso registrado em ${ano}.`, ano, false);
+            // Passa 'true' no último parâmetro para a coluna das anotações poder receber clique
+            renderizarSumarioEspecifico(pessoaisDoAno, summaryContentRight, `Nenhuma anotação registrada em ${ano}.`, ano, true);
+        }
+
+        function renderizarCalendario(mes, ano) {
+            calendarDays.innerHTML = '';
+            monthYearTitle.innerText = `${meses[mes]} ${ano}`;
+            
+            renderizarResumosAno(ano);
+
+            diasSemana.forEach(dia => {
+                const dayNameDiv = document.createElement('div');
+                dayNameDiv.classList.add('day-name');
+                dayNameDiv.innerText = dia;
+                calendarDays.appendChild(dayNameDiv);
+            });
+
+            const primeiroDia = new Date(ano, mes, 1).getDay();
+            const diasNoMes = new Date(ano, mes + 1, 0).getDate();
+
+            const anotacoesPessoais = JSON.parse(localStorage.getItem('dgfAnotacoes')) || [];
+            const todosOsEventos = [...eventosCorporativos, ...anotacoesPessoais];
+
+            for (let i = 0; i < primeiroDia; i++) {
+                const emptyDiv = document.createElement('div');
+                emptyDiv.classList.add('day', 'empty');
+                calendarDays.appendChild(emptyDiv);
+            }
+
+            for (let dia = 1; dia <= diasNoMes; dia++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.classList.add('day');
+
+                const diaDaSemana = new Date(ano, mes, dia).getDay();
+                if (diaDaSemana === 0 || diaDaSemana === 6) dayDiv.classList.add('weekend');
+
+                const dayNum = document.createElement('div');
+                dayNum.classList.add('day-number');
+                dayNum.innerText = dia;
+                dayDiv.appendChild(dayNum);
+
+                const mesFormatado = String(mes + 1).padStart(2, '0');
+                const diaFormatado = String(dia).padStart(2, '0');
+                const dataString = `${ano}-${mesFormatado}-${diaFormatado}`;
+                
+                // Registra a data no DOM para os itens clicáveis do sumário localizarem visualmente
+                dayDiv.setAttribute('data-date', dataString);
+                
+                if (datasSelecionadas.includes(dataString)) {
+                    dayDiv.classList.add('selected-day');
+                }
+
+                dayDiv.addEventListener('click', (e) => {
+                    if (e.ctrlKey || e.metaKey) {
+                        if (datasSelecionadas.includes(dataString)) {
+                            datasSelecionadas = datasSelecionadas.filter(d => d !== dataString);
+                            dayDiv.classList.remove('selected-day');
+                        } else {
+                            datasSelecionadas.push(dataString);
+                            dayDiv.classList.add('selected-day');
+                        }
+                        atualizarBotaoFlutuante();
+                    } else {
+                        datasSelecionadas = [dataString];
+                        document.querySelectorAll('.day').forEach(d => d.classList.remove('selected-day'));
+                        dayDiv.classList.add('selected-day');
+                        atualizarBotaoFlutuante(); 
+                        abrirModalParaAdicionarOuEditar();
+                    }
+                });
+
+                const eventosDoDia = todosOsEventos.filter(evento => evento.data === dataString);
+                
+                if (eventosDoDia.length > 0) {
+                    
+                    const temRecesso = eventosDoDia.some(e => e.tipo === 'recesso');
+                    const temFeriado = eventosDoDia.some(e => e.tipo === 'feriado');
+                    
+                    if (temRecesso) {
+                        dayDiv.classList.add('has-recesso'); 
+                    } else if (temFeriado) {
+                        dayDiv.classList.add('has-event'); 
+                    } else {
+                        const ultimaAnotacao = eventosDoDia.slice().reverse().find(e => e.tipo === 'pessoal');
+                        if (ultimaAnotacao) {
+                            dayDiv.classList.add(`has-pers-${ultimaAnotacao.cor}`);
+                        }
+                    }
+
+                    eventosDoDia.forEach(evento => {
+                        const eventLabel = document.createElement('div');
+                        eventLabel.classList.add('event-label');
+                        
+                        if (evento.tipo === 'recesso') {
+                            eventLabel.classList.add('recesso');
+                        } else if (evento.tipo === 'pessoal') {
+                            eventLabel.classList.add(`label-${evento.cor}`); 
+                        }
+                        
+                        let tituloLabel = evento.titulo;
+                        if (evento.tipo === 'pessoal' && evento.horario) {
+                            tituloLabel += ` (${evento.horario})`;
+                        }
+                        eventLabel.innerText = tituloLabel;
+                        
+                        let tituloCompleto = evento.titulo;
+                        if (dataString === '2026-06-22') tituloCompleto = 'Corpus Christi (transferido do dia 04 de junho)';
+                        if (dataString === '2026-08-10') tituloCompleto = 'Dia dos Cursos Jurídicos (antecipado do dia 11 de agosto)';
+                        if (dataString === '2026-10-30') tituloCompleto = 'Dia do Servidor Público (transferido do dia 28 de outubro)';
+                        if (dataString === '2026-12-08') tituloCompleto = 'Nossa Senhora da Conceição e Dia da Justiça';
+                        
+                        if (evento.tipo === 'pessoal' && evento.horario) {
+                            tituloCompleto += ` (${evento.horario})`;
+                        }
+                        
+                        eventLabel.title = tituloCompleto; 
+                        dayDiv.appendChild(eventLabel);
+                    });
+                }
+
+                calendarDays.appendChild(dayDiv);
+            }
+
+            const blocosUtilizados = primeiroDia + diasNoMes;
+            const blocosRestantes = 42 - blocosUtilizados;
+
+            for (let i = 0; i < blocosRestantes; i++) {
+                const emptyDiv = document.createElement('div');
+                emptyDiv.classList.add('day', 'empty');
+                calendarDays.appendChild(emptyDiv);
+            }
+        }
+
+        document.getElementById('prevBtn').addEventListener('click', () => {
+            mesAtual--;
+            if (mesAtual < 0) { mesAtual = 11; anoAtual--; }
+            renderizarCalendario(mesAtual, anoAtual);
+        });
+
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            mesAtual++;
+            if (mesAtual > 11) { mesAtual = 0; anoAtual++; }
+            renderizarCalendario(mesAtual, anoAtual);
+        });
+
+        renderizarCalendario(mesAtual, anoAtual);
+    </script>
 </body>
 </html>
