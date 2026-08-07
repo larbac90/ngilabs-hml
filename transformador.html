@@ -1,720 +1,345 @@
 <!DOCTYPE html>
-<html lang="pt-PT">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Transformação de Cargos e Funções - TJPE</title>
+    <!-- Fonte Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <style>
         /* ==========================================
-           DEFINIÇÃO DE TOKENS E CORES INSTITUCIONAIS
+           DEFINIÇÃO DE TOKENS E CORES
            ========================================== */
         :root {
-            /* Cores Oficiais do Manual */
-            --primary: #004488;         /* Azul TJPE (Pantone 287 C) */
-            --primary-dark: #002244;    /* Tom escuro derivado do Azul TJPE */
-            --primary-light: #e6f0fa;   /* Azul claro institucional para fundos */
-            --success: #009944;         /* Verde Oficial (Pantone 347 C) */
-            --danger: #DD2222;          /* Vermelho Oficial (Pantone 485 C) */
-            --yellow: #FFEEOO;          /* Amarelo Oficial */
-            --black: #000000;
-            --white: #FFFFFF;
+            --primary: #004488;         
+            --primary-dark: #002a5c;    
+            --primary-light: #e6f0fa;   
+            --primary-alpha: rgba(0, 68, 136, 0.1);
             
-            /* Tons de Apoio */
-            --bg-body: #071729;         /* Fundo da página (dark mode profissional) */
-            --card-bg: #FFFFFF;
-            --border-color: #D1D5DB;
-            --text-dark: #1F2937;
-            --text-muted: #4B5563;
+            --success: #059669;         
+            --danger: #dc2626;          
+            
+            --bg-body: #0f172a;         
+            --card-bg: #ffffff;
+            --panel-bg: #f8fafc;
+            
+            --border-color: #e2e8f0;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --text-light: #94a3b8;
+            
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
         }
 
-        /* ==========================================
-           CONFIGURAÇÕES TIPOGRÁFICAS GLOBAIS
-           ========================================== */
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: linear-gradient(135deg, var(--bg-body) 0%, var(--primary-dark) 100%);
-            margin: 0;
-            padding: 20px;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, var(--bg-body) 0%, #1e293b 100%);
+            margin: 0; padding: 40px 20px;
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-sizing: border-box;
-            color: var(--text-dark);
+            display: flex; flex-direction: column; align-items: center;
+            color: var(--text-main);
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* Estilo para valores numéricos e tabelas (Calibri) */
-        .calibri-values {
-            font-family: 'Calibri', 'Segoe UI', Arial, sans-serif;
-        }
+        .calibri-values { font-family: 'Inter', sans-serif; font-variant-numeric: tabular-nums; }
+
+        .app-header { text-align: center; color: white; margin-bottom: 30px; }
+        .app-header h1 { margin: 0; font-size: 32px; font-weight: 800; letter-spacing: -1px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        .app-header p { margin: 8px 0 0 0; color: #94a3b8; font-size: 15px; }
 
         /* ==========================================
-           ESTRUTURAÇÃO DO CONTAINER PRINCIPAL
+           SELETOR DE MODO GLOBAL
            ========================================== */
-        .container {
-            width: 100%;
-            max-width: 1250px; /* Expandido para dar mais espaço lateral aos nomes e novos controlos */
+        .modo-seletor-wrapper { display: flex; justify-content: center; margin-bottom: 20px; }
+        .modo-seletor { display: inline-flex; background: rgba(255,255,255,0.1); padding: 5px; border-radius: 99px; backdrop-filter: blur(10px); }
+        .btn-modo {
+            background: transparent; border: none; color: rgba(255,255,255,0.7);
+            padding: 10px 24px; border-radius: 99px; font-weight: 600; font-size: 14px;
+            cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 8px;
+        }
+        .btn-modo:hover:not(.active) { color: white; }
+        .btn-modo.active { background: var(--card-bg); color: var(--primary-dark); box-shadow: var(--shadow-sm); }
+
+        /* ==========================================
+           MESA DE TRABALHO (TOP BLOCK)
+           ========================================== */
+        .sandbox-container {
+            width: 100%; max-width: 1200px;
             background: var(--card-bg);
-            border-radius: 16px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-            padding: 35px 35px 20px 35px; /* Ajustado padding inferior de 35px para 20px para remover o vácuo branco */
-            box-sizing: border-box;
-            border-top: 6px solid var(--primary);
-            position: relative;
-            overflow: hidden;
+            border-radius: 20px;
+            box-shadow: var(--shadow-xl);
+            padding: 30px;
+            margin-bottom: 40px;
         }
 
-        /* Efeito de grafismo institucional de fundo */
-        .container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 120px;
-            height: 120px;
-            background: radial-gradient(circle, rgba(0,68,136,0.05) 0%, transparent 70%);
-            pointer-events: none;
-        }
-
-        /* Cabeçalho */
-        .header {
-            text-align: center;
-            margin-bottom: 35px;
-            border-bottom: 2px solid var(--primary-light);
-            padding-bottom: 25px;
-            position: relative;
-        }
-
-        .header h1 {
-            color: var(--primary);
-            margin: 0;
-            font-size: 28px;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-        }
-
-        /* ==========================================
-           GRID DE SIMULAÇÃO DOS PAINÉIS
-           ========================================== */
-        .simulador-grid {
+        .sandbox-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 30px;
             margin-bottom: 30px;
-            position: relative;
-            z-index: 10;
         }
-
-        @media (max-width: 950px) {
-            .simulador-grid {
-                grid-template-columns: 1fr;
-            }
-        }
+        @media (max-width: 850px) { .sandbox-grid { grid-template-columns: 1fr; } }
 
         .painel {
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 24px;
-            background: #FAFBFC;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
-            transition: transform 0.2s, box-shadow 0.2s;
-            position: relative;
-            z-index: 5;
+            border: 1px solid var(--border-color); border-radius: 16px; padding: 20px; background: var(--panel-bg);
         }
-
-        .painel:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.05);
-        }
-
-        /* Garante que o painel ativo fique por cima do outro para a lista não sumir atrás dele */
-        .painel:focus-within {
-            z-index: 30;
-        }
-
-        /* Bordas de Destaque com Cores Oficiais */
-        .painel-origem { 
-             border-top: 5px solid var(--danger); 
-         }
-        .painel-destino { 
-             border-top: 5px solid var(--success); 
-         }
-
         .painel h2 {
-            margin-top: 0;
-            font-size: 18px;
-            color: var(--primary-dark);
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 700;
+            margin: 0 0 20px 0; font-size: 16px; display: flex; align-items: center; gap: 8px; font-weight: 800; text-transform: uppercase;
         }
-
         .painel-origem h2 { color: var(--danger); }
         .painel-destino h2 { color: var(--success); }
 
-        .lista-linhas {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-bottom: 20px;
-            min-height: 50px;
+        /* Rodapé da Mesa de Trabalho */
+        .sandbox-footer {
+            background: var(--primary-dark);
+            border-radius: 16px; padding: 20px 30px;
+            display: flex; justify-content: space-between; align-items: center;
+            color: white; box-shadow: 0 10px 15px -3px rgba(0,68,136,0.3);
+            flex-wrap: wrap; gap: 20px;
         }
+        .live-balance { display: flex; gap: 40px; align-items: center; }
+        .live-balance-item { display: flex; flex-direction: column; }
+        .live-balance-item span { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.8; font-weight: 700; margin-bottom: 4px; }
+        .live-balance-item strong { font-size: 20px; font-weight: 800; }
+        
+        .live-balance-item.destaque { align-items: flex-end; }
+        .live-balance-item.destaque strong { font-size: 24px; color: #4ade80; }
 
-        /* Linha de seleção do Cargo */
-        .linha-cargo-box {
-            background: var(--white);
-            padding: 14px;
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            position: relative;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
-            transition: border-color 0.2s;
-            z-index: 2;
+        .btn-salvar-cenario {
+            background: var(--card-bg); color: var(--primary-dark);
+            border: none; border-radius: 10px; padding: 14px 24px;
+            font-weight: 800; font-size: 14px; cursor: pointer; transition: 0.2s;
+            display: flex; align-items: center; gap: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
+        .btn-salvar-cenario:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.2); }
 
-        .linha-cargo-box:hover {
-            border-color: var(--primary);
-        }
-
-        /* Eleva a linha que está com o combobox aberto acima das outras */
-        .linha-cargo-box:focus-within {
-            z-index: 40;
-        }
-
-        .linha-top {
+        /* ==========================================
+           GRID DE CENÁRIOS SALVOS (INFERIOR)
+           ========================================== */
+        .scenarios-grid {
+            width: 100%; max-width: 1200px;
             display: grid;
-            grid-template-columns: 85px 1fr 45px;
-            gap: 12px;
-            width: 100%;
-            align-items: center;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-bottom: 50px;
         }
+        @media (max-width: 1000px) { .scenarios-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 650px) { .scenarios-grid { grid-template-columns: 1fr; } }
 
-        .dropdown-combobox {
+        .cenario-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: var(--shadow-md);
+            padding: 24px;
+            display: flex; flex-direction: column; gap: 16px;
             position: relative;
-            width: 100%;
+            animation: fadeIn 0.3s ease-out;
+            border-top: 5px solid var(--primary);
         }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
 
-        /* ==========================================
-           ESTILIZAÇÃO DOS CAMPOS DE FORMULÁRIO E BUSCAS
-           ========================================== */
-        input[type="number"], .busca-input {
-            padding: 10px 14px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 14px;
-            box-sizing: border-box;
-            width: 100%;
-            height: 44px;
-            color: var(--text-dark);
-            background-color: var(--white);
-            transition: all 0.2s;
+        .cenario-header {
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--border-color); padding-bottom: 12px;
         }
-
-        input[type="number"] {
-            font-weight: 600;
-            text-align: center;
+        .cenario-titulo {
+            font-size: 16px; font-weight: 800; color: var(--primary-dark); margin: 0;
+            padding: 4px 8px; border-radius: 6px; border: 1px dashed transparent; cursor: text;
         }
-
-        input[type="number"]:focus, .busca-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(0, 68, 136, 0.15);
-        }
-
-        /* Customização para Textarea de busca */
-        textarea.busca-input {
-            height: auto;
-            min-height: 44px;
-            resize: none;
-            overflow: hidden;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            line-height: 1.4;
-            font-family: inherit;
-            padding-top: 11px;
-            padding-bottom: 11px;
-            padding-right: 30px; /* Espaço para o ícone indicador */
-            cursor: pointer;
-            text-overflow: clip;
-        }
-
-        /* Indicador do Dropdown */
-        .dropdown-combobox::after {
-            content: '▼';
-            position: absolute;
-            right: 14px;
-            top: 16px;
-            font-size: 9px;
-            color: var(--text-muted);
-            pointer-events: none;
-            transition: transform 0.2s;
-        }
-
-        /* Sugestões do Combobox */
-        .sugestoes-lista {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: var(--white);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            max-height: 280px;
-            overflow-y: auto;
-            z-index: 1000;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-            display: none;
-            margin-top: 6px;
-        }
-
-        /* Personalização do scrollbar das sugestões */
-        .sugestoes-lista::-webkit-scrollbar {
-            width: 8px;
-        }
-        .sugestoes-lista::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 8px;
-        }
-        .sugestoes-lista::-webkit-scrollbar-thumb {
-            background: #ccc;
-            border-radius: 8px;
-        }
-        .sugestoes-lista::-webkit-scrollbar-thumb:hover {
-            background: #999;
-        }
-
-        .sugestoes-grupo {
-            background: var(--primary-light);
-            padding: 8px 12px;
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--primary);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            position: sticky;
-            top: 0;
-            border-bottom: 1px solid rgba(0,68,136,0.1);
-        }
-
-        .sugestao-item {
-            padding: 12px 14px;
-            font-size: 13px;
-            cursor: pointer;
-            border-bottom: 1px solid #F3F4F6;
-            color: var(--text-dark);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: background 0.15s;
-        }
-
-        .sugestao-item span:first-child {
-            word-break: break-word;
-            padding-right: 10px;
-        }
-
-        .sugestao-item:last-child {
-            border-bottom: none;
-        }
-
-        .sugestao-item:hover {
-            background-color: var(--primary-light);
-            color: var(--primary-dark);
-        }
-
-        .sugestao-item .valor-label {
-            font-weight: 700;
-            color: var(--success);
-            margin-left: 12px;
-            white-space: nowrap;
-        }
-
-        /* ==========================================
-           CONTROLOS PREMIUM DE PROVIMENTO (SLIDE TOGGLE) - CENTRADO PERFEITO
-           ========================================== */
-        .toggle-switch-container {
-            position: relative;
-            display: inline-flex;
-            background: #E5E7EB;
-            border-radius: 9999px;
-            padding: 3px;
-            width: 144px;
-            height: 32px;
-            align-items: center;
-            border: 1px solid var(--border-color);
-            cursor: pointer;
-            user-select: none;
-            overflow: hidden;
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.08);
-            box-sizing: border-box;
-        }
+        .cenario-titulo:hover, .cenario-titulo:focus { border-color: var(--primary); background: var(--primary-light); outline: none; }
         
-        .toggle-slider {
-            position: absolute;
-            top: 3px;
-            left: 3px;
-            width: 68px;
-            height: calc(100% - 6px); /* Dimensionamento perfeitamente proporcional */
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            border-radius: 9999px;
-            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 1;
-            box-shadow: 0 2px 4px rgba(0, 44, 136, 0.25), 0 1px 2px rgba(0, 0, 0, 0.1);
-            box-sizing: border-box;
+        .btn-remover-cenario { background: var(--danger-light); color: var(--danger); border: none; border-radius: 6px; width: 28px; height: 28px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .btn-remover-cenario:hover { background: var(--danger); color: white; }
+
+        /* Mini Resumo Ajustado - FONTES MAIORES */
+        .cenario-mini-resumo { 
+            font-size: 14px; 
+            line-height: 1.6; 
+            background: var(--panel-bg); 
+            padding: 18px; 
+            border-radius: 8px; 
         }
-        
-        .toggle-btn {
-            flex: 1;
-            text-align: center;
-            font-size: 10px;
-            font-weight: 700;
-            color: var(--text-muted);
-            z-index: 2;
-            background: none;
-            border: none;
-            cursor: pointer;
-            outline: none;
-            padding: 0;
-            height: 100%;
-            text-transform: uppercase;
-            transition: color 0.15s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            letter-spacing: 0.6px;
-            box-sizing: border-box;
-        }
-        
-        .toggle-btn:not(.active):hover {
-            color: var(--primary-dark);
-        }
-        
-        .toggle-btn.active {
-            color: var(--white);
+        .cenario-mini-resumo .label-resumo {
+            font-size: 15px;
             font-weight: 800;
         }
-
-        /* Botões Gerais */
-        .btn-remover {
-            background: #FEE2E2;
-            color: var(--danger);
-            border: 1px solid #FCA5A5;
-            border-radius: 8px;
-            height: 44px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 14px;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .btn-remover:hover {
-            background: var(--danger);
-            color: var(--white);
-            border-color: var(--danger);
-        }
-
-        .btn-adicionar {
-            background: var(--primary);
-            color: var(--white);
-            border: none;
-            border-radius: 8px;
-            padding: 14px;
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 14px;
-            transition: all 0.2s;
-            margin-top: auto;
-            box-shadow: 0 4px 6px rgba(0, 68, 136, 0.15);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .btn-adicionar:hover {
-            background: var(--primary-dark);
-            transform: translateY(-1px);
-            box-shadow: 0 6px 12px rgba(0, 68, 136, 0.25);
-        }
-
-        /* ==========================================
-           BLOCOS DE RESULTADOS E BALANÇO FINANCEIRO
-           ========================================== */
-        .resultado-box {
-            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
-            color: var(--white);
-            border-radius: 12px;
-            padding: 25px;
-            text-align: center;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 20px rgba(0, 68, 136, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            position: relative;
-            z-index: 1; /* Mantém o balanço sempre abaixo das listas suspensas */
-        }
-
-        .resultado-box-title {
+        .cenario-mini-resumo ul {
+            margin: 6px 0 0 0;
+            padding-left: 20px;
+            color: var(--text-main);
             font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-weight: 700;
-            opacity: 0.9;
-            margin-bottom: 18px;
         }
-
-        .resultado-valores {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        @media (max-width: 600px) {
-            .resultado-valores {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .valor-card {
-            background: rgba(255, 255, 255, 0.08);
-            padding: 16px;
-            border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: transform 0.2s;
-        }
-
-        .valor-card:hover {
-            transform: scale(1.02);
-            background: rgba(255, 255, 255, 0.12);
-        }
-
-        .valor-card span {
-            display: block;
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            opacity: 0.75;
-            margin-bottom: 8px;
-            font-weight: 600;
-        }
-
-        .valor-card strong {
-            font-size: 20px;
-            font-weight: 700;
-        }
-
-        /* Mensagens de Validação e Viabilidade Técnicas */
-        .saldo-status {
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
-            text-align: left;
-            transition: all 0.3s ease;
-        }
-
-        .status-positivo { 
-             background-color: #137333; 
-             color: var(--white); 
-             border-left: 5px solid #2ECC71;
+        .cenario-mini-resumo li {
+            margin-bottom: 6px;
         }
         
-        .status-negativo { 
-             background-color: #A62B2B; 
-             color: var(--white); 
-             border-left: 5px solid #E74C3C;
+        .balanco-vertical { display: flex; flex-direction: column; gap: 8px; margin-top: 10px;}
+        .balanco-item { display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 600; padding: 6px 0; border-bottom: 1px dashed var(--border-color);}
+        .balanco-item.saldo { flex-direction: column; align-items: center; border: 2px solid var(--border-color); border-radius: 12px; padding: 16px; margin-top: 8px; background: var(--panel-bg); gap: 6px; border-bottom: 2px solid var(--border-color);}
+        .balanco-item.saldo span { text-transform: uppercase; font-size: 11px; color: var(--text-muted); letter-spacing: 0.5px; }
+        .balanco-item.saldo strong { font-size: 24px; }
+
+        .btn-exportar-cenario {
+            background-color: var(--panel-bg); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 8px;
+            padding: 10px; font-weight: 700; font-size: 13px; cursor: pointer; transition: 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: auto;
         }
+        .btn-exportar-cenario:hover { background-color: var(--primary-light); color: var(--primary-dark); border-color: var(--primary); }
 
         /* ==========================================
-           AÇÕES INFERIORES E RODAPÉ
+           LINHAS E CAMPOS DE BUSCA 
            ========================================== */
-        .acoes-inferiores {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 15px;
-            gap: 20px;
+        .lista-linhas { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
+        
+        .linha-cargo-box {
+            background: var(--card-bg); padding: 12px; border: 1px solid var(--border-color);
+            border-radius: 12px; display: flex; flex-direction: column; gap: 10px; position: relative;
+        }
+        .linha-cargo-box:focus-within { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-alpha); z-index: 10; }
+
+        .linha-top { display: grid; grid-template-columns: 60px 1fr 32px; gap: 8px; align-items: center; }
+        
+        input[type="number"], .busca-input {
+            padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px;
+            width: 100%; height: 38px; color: var(--text-main); background-color: var(--panel-bg); font-family: inherit;
+        }
+        input[type="number"] { font-weight: 600; text-align: center; padding: 8px 4px; }
+        input[type="number"]:focus, .busca-input:focus { outline: none; border-color: var(--primary); background-color: var(--card-bg); }
+
+        textarea.busca-input { height: auto; min-height: 38px; resize: none; overflow: hidden; line-height: 1.4; padding: 10px 24px 10px 10px; cursor: pointer; margin-bottom: 0; }
+        
+        .dropdown-combobox { position: relative; width: 100%; }
+        .dropdown-combobox::after {
+            content: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="%2364748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>');
+            position: absolute; right: 8px; top: 12px; pointer-events: none;
         }
 
-        .btn-voltar {
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 14px;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            transition: color 0.2s;
+        .sugestoes-lista {
+            position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: var(--card-bg);
+            border: 1px solid var(--border-color); border-radius: 8px; max-height: 250px; overflow-y: auto; z-index: 1000; box-shadow: var(--shadow-xl); display: none;
         }
+        .sugestoes-grupo { background: var(--panel-bg); padding: 8px 12px; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; position: sticky; top: 0; }
+        .sugestao-item { padding: 10px 12px; font-size: 12px; cursor: pointer; border-bottom: 1px solid var(--panel-bg); }
+        .sugestao-item:hover { background-color: var(--primary-light); }
 
-        .btn-voltar:hover {
-            color: var(--primary-dark);
-            text-decoration: underline;
+        .btn-remover-linha { background: transparent; color: var(--text-light); border: none; border-radius: 6px; height: 32px; width: 32px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; transition: 0.2s; }
+        .btn-remover-linha:hover { background: var(--danger-light); color: var(--danger); }
+        
+        .btn-adicionar {
+            background: transparent; color: var(--text-muted); border: 2px dashed var(--border-color);
+            border-radius: 8px; padding: 10px; cursor: pointer; font-weight: 600; font-size: 12px;
+            display: flex; align-items: center; justify-content: center; gap: 6px; transition: 0.2s; width: 100%;
         }
+        .btn-adicionar:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
 
-        .btn-exportar {
-            background-color: #374151;
-            color: var(--white);
-            border: none;
-            border-radius: 8px;
-            padding: 12px 20px;
-            font-weight: 700;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
+        .toggle-switch-container { position: relative; display: inline-flex; background: var(--border-color); border-radius: 99px; padding: 2px; width: 110px; height: 26px; align-items: center; cursor: pointer; user-select: none; }
+        .toggle-slider { position: absolute; top: 2px; left: 2px; width: 52px; height: calc(100% - 4px); background: var(--card-bg); border-radius: 99px; transition: transform 0.25s; z-index: 1; box-shadow: var(--shadow-sm); }
+        .toggle-btn { flex: 1; text-align: center; font-size: 9px; font-weight: 700; color: var(--text-muted); z-index: 2; background: none; border: none; cursor: pointer; height: 100%; text-transform: uppercase; }
+        .toggle-btn.active { color: var(--primary-dark); }
 
-        .btn-exportar:hover {
-            background-color: #1F2937;
-            transform: translateY(-1px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-        }
+        /* ==========================================
+           EXPORTAÇÃO
+           ========================================== */
+        .export-header { display: none; justify-content: center; align-items: center; gap: 20px; margin-bottom: 25px; padding-bottom: 20px; border-bottom: 2px solid var(--border-color); }
+        .export-header img { height: 40px; }
 
-        /* TOAST NOTIFICATION */
-        .toast-notification {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            padding: 16px 24px;
-            border-radius: 8px;
-            background: var(--primary-dark);
-            color: var(--white);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-            font-weight: 600;
-            font-size: 14px;
-            z-index: 2000;
-            transform: translateY(150%);
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            border-left: 5px solid var(--primary);
+        .cenario-card.exporting {
+            width: 700px; 
+            box-shadow: none; border-radius: 0; padding: 40px; margin: 0; background: white; border: none;
         }
+        .cenario-card.exporting .export-header { display: flex; }
+        .cenario-card.exporting .btn-remover-cenario, .cenario-card.exporting .btn-exportar-cenario, .cenario-card.exporting .cenario-titulo span { display: none; }
+        .cenario-card.exporting .cenario-mini-resumo { padding: 20px; }
+        .cenario-card.exporting .balanco-item { font-size: 16px; padding: 12px 0; }
+        .cenario-card.exporting .balanco-item.saldo strong { font-size: 32px; }
 
-        .toast-notification.show {
-            transform: translateY(0);
-        }
-
-        .toast-notification.success {
-            border-left-color: var(--success);
-        }
-
-        .toast-notification.danger {
-            border-left-color: var(--danger);
-        }
-
-        /* Rodapé de Conformidade - Espaçamento encolhido cirurgicamente */
-        footer {
-            margin-top: 15px;       /* Reduzido de 20px para 15px */
-            border-top: 2px solid var(--primary-light);
-            padding-top: 12px;      /* Reduzido de 15px para 12px */
-            text-align: center;
-        }
-
-        .footer-logos {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 40px;
-            margin-bottom: 6px;     /* Reduzido de 12px para 6px */
-        }
-
-        .footer-logo {
-            height: 38px;           
-            object-fit: contain;
-            filter: drop-shadow(0 2px 5px rgba(0,0,0,0.06));
-            transition: transform 0.2s;
-        }
-
-        .footer-logo:hover {
-            transform: scale(1.05);
-        }
-
-        .footer-text {
-            font-size: 11px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-weight: 700;
-        }
+        footer { text-align: center; margin-top: auto; padding: 20px 0;}
+        .footer-logos { display: flex; justify-content: center; align-items: center; gap: 30px; margin-bottom: 12px; }
+        .footer-logo { height: 32px; object-fit: contain; opacity: 0.8; filter: grayscale(100%); transition: 0.3s; }
+        .footer-logo:hover { opacity: 1; filter: grayscale(0%); }
+        .footer-text { font-size: 11px; color: var(--text-light); text-transform: uppercase; letter-spacing: 2px; font-weight: 600; }
+        
+        .toast-notification { position: fixed; bottom: 30px; right: 30px; padding: 16px 24px; border-radius: 12px; background: var(--text-main); color: var(--card-bg); font-weight: 600; font-size: 14px; z-index: 2000; transform: translateY(150%); transition: transform 0.4s; display: flex; align-items: center; gap: 12px; box-shadow: var(--shadow-xl); }
+        .toast-notification.show { transform: translateY(0); }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
-<div class="container" id="conteudo-projeto">
-    <div class="header">
-        <h1>Transformação de Cargos e Funções</h1>
+
+    <div class="app-header">
+        <h1>Simulador de Transformação</h1>
+        <p>Ajuste os valores na mesa de trabalho e salve diferentes cenários para comparar.</p>
     </div>
 
-    <div class="simulador-grid">
-        <div class="painel painel-origem">
-            <h2>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                Cargos/Funções a Extinguir
-            </h2>
-            <div id="container-origem" class="lista-linhas"></div>
-            <button class="btn-adicionar" onclick="adicionarLinha('origem')">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                Adicionar Cargo
+    <!-- SELETOR GLOBAL -->
+    <div class="modo-seletor-wrapper">
+        <div class="modo-seletor">
+            <button id="btn-modo-comissionado" class="btn-modo active" onclick="setModoGlobal('comissionado')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                Cargos Comissionados
             </button>
-        </div>
-
-        <div class="painel painel-destino">
-            <h2>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                Cargos/Funções a Criar
-            </h2>
-            <div id="container-destino" class="lista-linhas"></div>
-            <button class="btn-adicionar" onclick="adicionarLinha('destino')">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                Adicionar Cargo
+            <button id="btn-modo-funcao" class="btn-modo" onclick="setModoGlobal('funcao')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                Funções Gratificadas
             </button>
         </div>
     </div>
 
-    <div class="resultado-box">
-        <div class="resultado-box-title">Balanço Financeiro da Proposta</div>
-        <div class="resultado-valores calibri-values">
-            <div class="valor-card">
-                <span>Crédito (Extintos)</span>
-                <strong id="val-credito">R$ 0,00</strong>
+    <!-- MESA DE TRABALHO (TOP BLOCK) -->
+    <div class="sandbox-container">
+        <div class="sandbox-grid">
+            <div class="painel painel-origem">
+                <h2>
+                    <span style="color: var(--danger);">❑</span> 1. O QUE SAI (EXTINGUIR)
+                </h2>
+                <div class="lista-linhas" id="container-origem"></div>
+                <button class="btn-adicionar" onclick="adicionarLinha('origem')">
+                    + Adicionar Cargo/Função
+                </button>
             </div>
-            <div class="valor-card">
-                <span>Custo (Novos)</span>
-                <strong id="val-custo">R$ 0,00</strong>
-            </div>
-            <div class="valor-card">
-                <span>Saldo Líquido</span>
-                <strong id="val-saldo">R$ 0,00</strong>
+
+            <div class="painel painel-destino">
+                <h2>
+                    <span style="color: var(--success);">+</span> 2. O QUE ENTRA (CRIAR)
+                </h2>
+                <div class="lista-linhas" id="container-destino"></div>
+                <button class="btn-adicionar" onclick="adicionarLinha('destino')">
+                    + Adicionar Cargo/Função
+                </button>
             </div>
         </div>
-        <div id="status-mensagem" class="saldo-status" style="display: none;">
-            --
+
+        <div class="sandbox-footer calibri-values">
+            <div class="live-balance">
+                <div class="live-balance-item">
+                    <span>Valor dos Cargos/Funções atuais</span>
+                    <strong id="live-credito" style="color: #60a5fa;">R$ 0,00</strong>
+                </div>
+                <div class="live-balance-item">
+                    <span>Custo do Cargos/Funções novos</span>
+                    <strong id="live-custo" style="color: #60a5fa;">R$ 0,00</strong>
+                </div>
+                <div class="live-balance-item destaque" style="align-items: flex-end;">
+                    <span>Impacto</span>
+                    <strong id="live-saldo" style="color: #4ade80;">R$ 0,00<span style="font-size: 13px; font-weight: 600; opacity: 0.8;">/mês</span></strong>
+                    <span id="live-saldo-ano" style="font-size: 14px; font-weight: 800; color: #4ade80; margin-top: 2px; text-transform: none;">R$ 0,00 /ano</span>
+                </div>
+            </div>
+            <button class="btn-salvar-cenario" onclick="salvarCenario()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                Adicionar Cenário
+            </button>
         </div>
     </div>
 
-    <div class="acoes-inferiores">
-        <a href="index.html" class="btn-voltar">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-            Voltar ao Portal Principal
-        </a>
-        <button class="btn-exportar" onclick="exportarComoImagem()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-            Exportar Proposta
-        </button>
+    <!-- GRID DE CENÁRIOS SALVOS (INFERIOR - 3 COLUNAS) -->
+    <div class="scenarios-grid" id="scenarios-grid">
+        <!-- Cenários salvos aparecerão aqui -->
     </div>
 
     <footer>
@@ -724,7 +349,6 @@
         </div>
         <div class="footer-text">DGF • NUGOV • TJPE</div>
     </footer>
-</div>
 
 <div id="toast" class="toast-notification">
     <span id="toast-message">Notificação</span>
@@ -732,11 +356,12 @@
 
 <script>
 /* ==========================================
-   INICIALIZAÇÃO DA BASE DE DADOS COMPLETA CONFORME MANUAL OFICIAL
+   DADOS E REGRAS DE NEGÓCIO
    ========================================== */
 const FATOR_ATUALIZACAO = 1.053;
+let modoAtualGlobal = 'comissionado';
+let contadorCenarios = 0;
 
-// Valores Base e Representação originais mapeados diretamente da tabela (Sem o fator de 1.053 pré-aplicado)
 const valoresComissionadosRef = {
     "APJC":     { base: 1319.77,  rep: 1583.72  },
     "DGAPJC":   { base: 12260.68, rep: 14712.82 },
@@ -954,107 +579,31 @@ const funcoesGratificadasData = [
     {n: "SUPERVISOR TÉCNICO DO NÚCLEO DE REVISÃO E CERTIFICAÇÃO REMOTA", s: "FGSNRC", v: 3997.02}
 ];
 
-function formatarMoeda(valor) {
-    return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-}
+function formatarMoeda(valor) { return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
 
-/* ==========================================
-   GATILHOS UX E NOTIFICAÇÕES TOAST
-   ========================================== */
 function mostrarToast(mensagem, tipo = 'success') {
     const toast = document.getElementById('toast');
-    const toastMsg = document.getElementById('toast-message');
-    
+    document.getElementById('toast-message').innerText = mensagem;
     toast.className = `toast-notification ${tipo} show`;
-    toastMsg.innerText = mensagem;
-    
-    setTimeout(() => {
-        toast.classList.remove('show');
-    }, 4000);
+    setTimeout(() => { toast.classList.remove('show'); }, 3000);
 }
 
-// Redimensionamento automático do Textarea para cobrir o texto longo
-function ajustarAlturaTextarea(textarea) {
-    textarea.style.height = 'auto';
-    textarea.style.height = textarea.scrollHeight + 'px';
-}
-
-/* ==========================================
-   CONTROLES DO SELETOR DE VÍNCULO DESLIZANTE
-   ========================================== */
-function setVinculo(button, value) {
-    const box = button.closest('.linha-cargo-box');
-    const toggleContainer = button.parentElement;
-    const slider = toggleContainer.querySelector('.toggle-slider');
-    const buttons = toggleContainer.querySelectorAll('.toggle-btn');
+function setModoGlobal(modo) {
+    modoAtualGlobal = modo;
+    document.getElementById('btn-modo-comissionado').classList.toggle('active', modo === 'comissionado');
+    document.getElementById('btn-modo-funcao').classList.toggle('active', modo === 'funcao');
     
-    buttons.forEach(btn => btn.classList.remove('active'));
-    button.classList.add('active');
+    // Limpa a mesa de trabalho
+    document.getElementById('container-origem').innerHTML = '';
+    document.getElementById('container-destino').innerHTML = '';
+    adicionarLinha('origem');
+    adicionarLinha('destino');
     
-    if (value === 'puro') {
-        slider.style.transform = 'translateX(0)';
-    } else {
-        slider.style.transform = 'translateX(68px)';
-    }
-    
-    box.setAttribute('data-vinculo', value);
-    
-    atualizarValoresBreakdown(box);
-    calcularTransformacao();
-}
-
-function atualizarValoresBreakdown(box) {
-    const input = box.querySelector('.busca-input');
-    const baseVal = parseFloat(input.getAttribute('data-base')) || 0;
-    const repVal = parseFloat(input.getAttribute('data-rep')) || 0;
-    
-    const baseAtualizada = baseVal * FATOR_ATUALIZACAO;
-    const repAtualizada = repVal * FATOR_ATUALIZACAO;
-    const totalAtualizado = baseAtualizada + repAtualizada;
-    
-    const vinculo = box.getAttribute('data-vinculo') || 'puro';
-    
-    const baseSpan = box.querySelector('.v-base');
-    const repSpan = box.querySelector('.v-rep');
-    const totalSpan = box.querySelector('.v-total');
-    
-    if (baseSpan && repSpan && totalSpan) {
-        baseSpan.innerText = formatarMoeda(baseAtualizada);
-        repSpan.innerText = formatarMoeda(repAtualizada);
-        totalSpan.innerText = formatarMoeda(totalAtualizado);
-        
-        // Destaca dinamicamente qual componente está ativo no cálculo orçamentário
-        if (vinculo === 'puro') {
-            baseSpan.style.color = 'var(--text-dark)';
-            baseSpan.style.textDecoration = 'none';
-            baseSpan.style.opacity = '1';
-            
-            repSpan.style.color = 'var(--text-dark)';
-            repSpan.style.textDecoration = 'none';
-            repSpan.style.opacity = '1';
-            
-            totalSpan.style.color = 'var(--success)';
-            totalSpan.style.textDecoration = 'none';
-            totalSpan.style.opacity = '1';
-        } else {
-            // Caso Efetivo - Salário Base e Total do cargo são riscados do cálculo
-            baseSpan.style.color = 'var(--text-muted)';
-            baseSpan.style.textDecoration = 'line-through';
-            baseSpan.style.opacity = '0.5';
-            
-            repSpan.style.color = 'var(--success)';
-            repSpan.style.textDecoration = 'none';
-            repSpan.style.opacity = '1';
-            
-            totalSpan.style.color = 'var(--text-muted)';
-            totalSpan.style.textDecoration = 'line-through';
-            totalSpan.style.opacity = '0.5';
-        }
-    }
+    mostrarToast(`Mesa de trabalho configurada para: ${modo === 'comissionado' ? 'Comissionados' : 'Funções'}`);
 }
 
 /* ==========================================
-   LÓGICA DINÂMICA DE LINHAS DO SIMULADOR
+   LÓGICA DA MESA DE TRABALHO
    ========================================== */
 function adicionarLinha(tipo) {
     const container = document.getElementById(`container-${tipo}`);
@@ -1063,404 +612,361 @@ function adicionarLinha(tipo) {
 
     box.innerHTML = `
         <div class="linha-top">
-            <input type="number" class="qtd-${tipo} calibri-values" value="1" min="1" oninput="calcularTransformacao()">
+            <input type="number" class="calibri-values" value="1" min="1" oninput="calcularSandbox()">
             <div class="dropdown-combobox">
-                <textarea class="busca-input" placeholder="Clique p/ listar tudo / Digite para filtrar..."
-                    onfocus="abrirListaCompleta(this, '${tipo}'); ajustarAlturaTextarea(this);"
-                    oninput="filtrarListaAoDigitar(this, '${tipo}'); ajustarAlturaTextarea(this);"
-                    rows="1"></textarea>
+                <textarea class="busca-input" placeholder="Buscar..." onfocus="abrirListaCompleta(this);" oninput="filtrarListaAoDigitar(this);" rows="1"></textarea>
                 <div class="sugestoes-lista"></div>
             </div>
-            <button class="btn-remover" onclick="removerLinha(this)">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            <button class="btn-remover-linha" onclick="removerLinha(this)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
         </div>
         
-        <div class="detalhes-comissionado" style="display: none; padding-top: 10px; border-top: 1px dashed var(--border-color); justify-content: space-between; align-items: center; width: 100%; gap: 15px; flex-wrap: wrap;">
-            <div class="vinculo-selector" style="display: flex; align-items: center; gap: 10px;">
-                <span style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Vínculo:</span>
-                <div class="toggle-switch-container">
-                    <div class="toggle-slider"></div>
-                    <button type="button" onclick="setVinculo(this, 'puro')" class="toggle-btn active">Puro</button>
-                    <button type="button" onclick="setVinculo(this, 'efetivo')" class="toggle-btn">Efetivo</button>
-                </div>
+        <div class="detalhes-comissionado" style="display: none; padding-top: 10px; border-top: 1px dashed var(--border-color); justify-content: space-between; align-items: center; flex-wrap: wrap;">
+            <div class="toggle-switch-container">
+                <div class="toggle-slider"></div>
+                <button type="button" onclick="setVinculo(this, 'puro')" class="toggle-btn active">Puro</button>
+                <button type="button" onclick="setVinculo(this, 'efetivo')" class="toggle-btn">Efetivo</button>
             </div>
-            <div class="valores-breakdown" style="font-size: 12px; font-family: 'Calibri', sans-serif; text-align: right; color: var(--text-muted);">
-                Base: <span class="v-base" style="font-weight: 700;">R$ 0,00</span> | 
-                Repr: <span class="v-rep" style="font-weight: 700;">R$ 0,00</span> | 
-                Custo Total Ref.: <span class="v-total" style="font-weight: 700;">R$ 0,00</span>
+            <div class="valores-breakdown" style="font-size: 12px; text-align: right; color: var(--text-muted); display: flex; align-items: center; gap: 8px; margin-left: auto;">
+                <span class="wrap-base-rep">Base: <span class="v-base" style="font-weight: 600;">R$ 0</span> • Repr: <span class="v-rep" style="font-weight: 600;">R$ 0</span> | </span>
+                <span style="font-size: 15px; color: var(--text-main);">Total: <span class="v-total" style="font-weight: 700;">R$ 0</span></span>
             </div>
         </div>
     `;
-
     container.appendChild(box);
-    calcularTransformacao();
+    calcularSandbox();
 }
 
 function removerLinha(botao) {
-    const painelPai = botao.closest('.painel');
     botao.closest('.linha-cargo-box').remove();
-    if (painelPai.classList.contains('painel-origem')) {
-        sincronizarTravaDestino();
-    }
-    calcularTransformacao();
+    calcularSandbox();
 }
 
-function abrirListaCompleta(input, tipoPainel) {
-    document.querySelectorAll('.sugestoes-lista').forEach(l => l.style.display = 'none');
-    const lista = input.parentElement.querySelector('.sugestoes-lista');
-    lista.style.display = 'block';
-    const trava = (tipoPainel === 'destino') ? obterFiltroTrava() : 'todos';
+function ajustarAlturaTextarea(textarea) {
+    textarea.style.height = 'auto';
+    textarea.style.height = textarea.scrollHeight + 'px';
+}
+
+function setVinculo(button, value) {
+    const box = button.closest('.linha-cargo-box');
+    const slider = button.parentElement.querySelector('.toggle-slider');
+    const buttons = button.parentElement.querySelectorAll('.toggle-btn');
     
-    renderizarDropdownCustomizado(lista, tipoPainel, "", trava);
-    input.select();
+    buttons.forEach(btn => btn.classList.remove('active'));
+    button.classList.add('active');
+    slider.style.transform = value === 'puro' ? 'translateX(0)' : 'translateX(54px)';
+    box.setAttribute('data-vinculo', value);
+    
+    atualizarBreakdownLinha(box);
+    calcularSandbox();
 }
 
-function filtrarListaAoDigitar(input, tipoPainel) {
-    const lista = input.parentElement.querySelector('.sugestoes-lista');
-    lista.style.display = 'block';
-    const trava = (tipoPainel === 'destino') ? obterFiltroTrava() : 'todos';
-    renderizarDropdownCustomizado(lista, tipoPainel, input.value, trava);
+function atualizarBreakdownLinha(box) {
+    const input = box.querySelector('.busca-input');
+    const tipo = input.getAttribute('data-tipo');
+    const totalSpan = box.querySelector('.v-total');
+    
+    if (tipo === 'comissionado') {
+        const baseVal = parseFloat(input.getAttribute('data-base')) || 0;
+        const repVal = parseFloat(input.getAttribute('data-rep')) || 0;
+        const vinculo = box.getAttribute('data-vinculo') || 'puro';
+        const baseSpan = box.querySelector('.v-base');
+        const repSpan = box.querySelector('.v-rep');
+        
+        baseSpan.innerText = formatarMoeda(baseVal * FATOR_ATUALIZACAO);
+        repSpan.innerText = formatarMoeda(repVal * FATOR_ATUALIZACAO);
+        totalSpan.innerText = formatarMoeda((baseVal + repVal) * FATOR_ATUALIZACAO);
+        
+        if (vinculo === 'puro') {
+            baseSpan.style.textDecoration = 'none'; baseSpan.style.opacity = '1';
+            totalSpan.style.textDecoration = 'none'; totalSpan.style.opacity = '1'; totalSpan.style.color = 'var(--text-main)';
+        } else {
+            baseSpan.style.textDecoration = 'line-through'; baseSpan.style.opacity = '0.5';
+            totalSpan.style.textDecoration = 'line-through'; totalSpan.style.opacity = '0.5'; totalSpan.style.color = 'var(--text-muted)';
+        }
+    } else if (tipo === 'funcao') {
+        const val = parseFloat(input.getAttribute('data-valor')) || 0;
+        totalSpan.innerText = formatarMoeda(val * FATOR_ATUALIZACAO);
+        totalSpan.style.textDecoration = 'none'; 
+        totalSpan.style.opacity = '1'; 
+        totalSpan.style.color = 'var(--text-main)';
+    }
 }
 
 /* ==========================================
-   RENDERIZAÇÃO DOS COMPONENTES DE PESQUISA
+   DROPDOWNS
    ========================================== */
-function renderizarDropdownCustomizado(listaElement, tipoPainel, termo, trava) {
+function abrirListaCompleta(input) {
+    document.querySelectorAll('.sugestoes-lista').forEach(l => l.style.display = 'none');
+    const lista = input.parentElement.querySelector('.sugestoes-lista');
+    lista.style.display = 'block';
+    renderDropdown(lista, "");
+    input.select();
+}
+
+function filtrarListaAoDigitar(input) {
+    const lista = input.parentElement.querySelector('.sugestoes-lista');
+    lista.style.display = 'block';
+    renderDropdown(lista, input.value);
+}
+
+function renderDropdown(listaElement, termo) {
     const busca = termo.toLowerCase().trim();
     let html = '';
 
-    if (trava === "todos" || trava === "comissionado") {
-        let itensCom = '';
+    if (modoAtualGlobal === "comissionado") {
         comissionadosData.forEach(c => {
             const ref = valoresComissionadosRef[c.s] || { base: 0, rep: 0 };
-            const valorPuro = (ref.base + ref.rep) * FATOR_ATUALIZACAO;
-            const valorEfetivo = ref.rep * FATOR_ATUALIZACAO;
-            
-            const matchSigla = c.s.toLowerCase().includes(busca);
-            const matchNome = c.n.toLowerCase().includes(busca);
-
-            if (busca === "" || matchSigla || matchNome) {
-                itensCom += `
-                    <div class="sugestao-item" 
-                         data-codigo="${c.s}" 
-                         data-base="${ref.base}" 
-                         data-rep="${ref.rep}" 
-                         data-tipo="comissionado" 
-                         data-label="🔸 [${c.s}] ${c.n}" 
-                         onclick="selecionarOpcao(this, '${tipoPainel}')">
-                        <div style="display: flex; flex-direction: column; width: 100%;">
-                            <span style="font-size: 13px;">🔸 <strong>${c.s}</strong> - <small>${c.n}</small></span>
-                            <span style="font-size: 11px; color: var(--text-muted); margin-top: 4px; display: flex; gap: 15px;">
-                                <span>Puro: <strong style="color: var(--primary); font-family: Calibri;">${formatarMoeda(valorPuro)}</strong></span>
-                                <span>Efetivo: <strong style="color: var(--success); font-family: Calibri;">${formatarMoeda(valorEfetivo)}</strong></span>
-                            </span>
-                        </div>
+            if (c.s.toLowerCase().includes(busca) || c.n.toLowerCase().includes(busca) || busca === "") {
+                html += `
+                    <div class="sugestao-item" data-codigo="${c.s}" data-base="${ref.base}" data-rep="${ref.rep}" data-tipo="comissionado" data-label="[${c.s}] ${c.n}" onclick="selecionarOpcao(this)">
+                        <span style="font-weight: 600;">${c.s}</span> - <span style="color: var(--text-muted);">${c.n}</span>
                     </div>`;
             }
         });
-        if (itensCom) {
-            html += '<div class="sugestoes-grupo">Cargos Comissionados</div>' + itensCom;
-        }
-    }
-
-    if (trava === "todos" || trava === "funcao") {
-        let itensFun = '';
+    } else {
         funcoesGratificadasData.forEach(f => {
-            const matchSigla = f.s.toLowerCase().includes(busca);
-            const matchNome = f.n.toLowerCase().includes(busca);
-            const valorAtualizado = f.v * FATOR_ATUALIZACAO;
-
-            if (busca === "" || matchSigla || matchNome) {
-                itensFun += `
-                    <div class="sugestao-item" 
-                         data-codigo="${f.s}" 
-                         data-valor="${f.v}" 
-                         data-tipo="funcao" 
-                         data-label="🔹 [${f.s}] ${f.n}" 
-                         onclick="selecionarOpcao(this, '${tipoPainel}')">
-                        <div style="display: flex; flex-direction: column; width: 100%;">
-                            <span>🔹 <strong>${f.s}</strong> - <small>${f.n}</small></span>
-                            <span style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
-                                Valor Ref.: <strong style="color: var(--success); font-family: Calibri;">${formatarMoeda(valorAtualizado)}</strong>
-                            </span>
-                        </div>
+            if (f.s.toLowerCase().includes(busca) || f.n.toLowerCase().includes(busca) || busca === "") {
+                html += `
+                    <div class="sugestao-item" data-codigo="${f.s}" data-valor="${f.v}" data-tipo="funcao" data-label="[${f.s}] ${f.n}" onclick="selecionarOpcao(this)">
+                        <span style="font-weight: 600;">${f.s}</span> - <span style="color: var(--text-muted);">${f.n}</span>
                     </div>`;
             }
         });
-        if (itensFun) {
-            html += '<div class="sugestoes-grupo">Funções Gratificadas</div>' + itensFun;
-        }
     }
 
-    if (!html) {
-        html = '<div style="padding:16px; color:#999; font-size:13px; text-align:center; font-style:italic;">Nenhum cargo/função encontrado...</div>';
-    }
-
-    listaElement.innerHTML = html;
+    listaElement.innerHTML = html || '<div style="padding:16px; color:var(--text-light); font-size:12px; text-align:center;">Nenhum item...</div>';
 }
 
-function selecionarOpcao(itemElement, tipoPainel) {
+function selecionarOpcao(itemElement) {
     const box = itemElement.closest('.linha-cargo-box');
     const input = box.querySelector('.busca-input');
     const lista = box.querySelector('.sugestoes-lista');
-
-    const codigo = itemElement.getAttribute('data-codigo');
     const tipo = itemElement.getAttribute('data-tipo');
-    const label = itemElement.getAttribute('data-label');
     
-    input.value = label;
+    input.value = itemElement.getAttribute('data-label');
     input.setAttribute('data-tipo', tipo);
-    input.setAttribute('data-codigo', codigo);
-    
     lista.style.display = 'none';
 
     const detalhesDiv = box.querySelector('.detalhes-comissionado');
 
     if (tipo === 'comissionado') {
-        const baseVal = parseFloat(itemElement.getAttribute('data-base')) || 0;
-        const repVal = parseFloat(itemElement.getAttribute('data-rep')) || 0;
+        input.setAttribute('data-base', itemElement.getAttribute('data-base'));
+        input.setAttribute('data-rep', itemElement.getAttribute('data-rep'));
+        if (!box.getAttribute('data-vinculo')) box.setAttribute('data-vinculo', 'puro');
         
-        input.setAttribute('data-base', baseVal);
-        input.setAttribute('data-rep', repVal);
-        
-        // Garante que o vínculo seja iniciado ou mantido como "puro"
-        if (!box.getAttribute('data-vinculo')) {
-            box.setAttribute('data-vinculo', 'puro');
-            const toggleContainer = box.querySelector('.toggle-switch-container');
-            if (toggleContainer) {
-                const slider = toggleContainer.querySelector('.toggle-slider');
-                slider.style.transform = 'translateX(0)';
-                toggleContainer.querySelectorAll('.toggle-btn').forEach(btn => {
-                    btn.classList.remove('active');
-                    if (btn.innerText.toLowerCase() === 'puro') btn.classList.add('active');
-                });
-            }
-        }
-        
+        box.querySelector('.toggle-switch-container').style.display = 'inline-flex';
+        box.querySelector('.wrap-base-rep').style.display = 'inline';
         detalhesDiv.style.display = 'flex';
-        atualizarValoresBreakdown(box);
+        atualizarBreakdownLinha(box);
     } else {
-        // Função gratificada
-        const valorVal = parseFloat(itemElement.getAttribute('data-valor')) || 0;
-        input.setAttribute('data-valor', valorVal);
-        input.removeAttribute('data-base');
-        input.removeAttribute('data-rep');
+        input.setAttribute('data-valor', itemElement.getAttribute('data-valor'));
         
-        detalhesDiv.style.display = 'none';
+        box.querySelector('.toggle-switch-container').style.display = 'none';
+        box.querySelector('.wrap-base-rep').style.display = 'none';
+        detalhesDiv.style.display = 'flex';
+        atualizarBreakdownLinha(box);
     }
 
     ajustarAlturaTextarea(input);
-
-    if (tipoPainel === 'origem') {
-        sincronizarTravaDestino();
-    }
-    calcularTransformacao();
-}
-
-function obterFiltroTrava() {
-    const inputsOrigem = document.querySelectorAll('#container-origem .busca-input');
-    for (let input of inputsOrigem) {
-        const tipo = input.getAttribute('data-tipo');
-        if (tipo === 'comissionado' || tipo === 'funcao') {
-            return tipo;
-        }
-    }
-    return "todos";
-}
-
-function sincronizarTravaDestino() {
-    const trava = obterFiltroTrava();
-    const inputsDestino = document.querySelectorAll('#container-destino .busca-input');
-
-    inputsDestino.forEach(input => {
-        const tipoAtual = input.getAttribute('data-tipo');
-        if (trava !== 'todos' && tipoAtual && tipoAtual !== trava) {
-            input.value = '';
-            input.removeAttribute('data-valor');
-            input.removeAttribute('data-tipo');
-            input.removeAttribute('data-codigo');
-            const box = input.closest('.linha-cargo-box');
-            if (box) {
-                box.querySelector('.detalhes-comissionado').style.display = 'none';
-            }
-            ajustarAlturaTextarea(input);
-        }
-    });
+    calcularSandbox();
 }
 
 /* ==========================================
-   CALCULAR TRANSFORMAÇÃO E BALANÇO FINANCEIRO
+   CÁLCULOS E SALVAMENTO DE CENÁRIOS
    ========================================== */
-function calcularTransformacao() {
-    let totalCredito = 0;
-    let totalCusto = 0;
-    let temOrigem = false;
-    let temDestino = false;
-
-    const boxesOrigem = document.querySelectorAll('#container-origem .linha-cargo-box');
-    boxesOrigem.forEach(box => {
-        const qtd = parseInt(box.querySelector('input[type="number"]').value) || 0;
-        const input = box.querySelector('.busca-input');
-        const tipo = input.getAttribute('data-tipo');
-        
-        let valorCalculado = 0;
-        if (tipo === 'comissionado') {
-            const baseVal = parseFloat(input.getAttribute('data-base')) || 0;
-            const repVal = parseFloat(input.getAttribute('data-rep')) || 0;
-            const vinculo = box.getAttribute('data-vinculo') || 'puro';
-            
-            if (vinculo === 'puro') {
-                valorCalculado = (baseVal + repVal) * FATOR_ATUALIZACAO;
-            } else {
-                valorCalculado = repVal * FATOR_ATUALIZACAO;
-            }
-        } else if (tipo === 'funcao') {
-            const valorVal = parseFloat(input.getAttribute('data-valor')) || 0;
-            valorCalculado = valorVal * FATOR_ATUALIZACAO;
-        }
-        
-        totalCredito += qtd * valorCalculado;
-        if (valorCalculado > 0) temOrigem = true;
-    });
-
-    const boxesDestino = document.querySelectorAll('#container-destino .linha-cargo-box');
-    boxesDestino.forEach(box => {
-        const qtd = parseInt(box.querySelector('input[type="number"]').value) || 0;
-        const input = box.querySelector('.busca-input');
-        const tipo = input.getAttribute('data-tipo');
-        
-        let valorCalculado = 0;
-        if (tipo === 'comissionado') {
-            const baseVal = parseFloat(input.getAttribute('data-base')) || 0;
-            const repVal = parseFloat(input.getAttribute('data-rep')) || 0;
-            const vinculo = box.getAttribute('data-vinculo') || 'puro';
-            
-            if (vinculo === 'puro') {
-                valorCalculado = (baseVal + repVal) * FATOR_ATUALIZACAO;
-            } else {
-                valorCalculado = repVal * FATOR_ATUALIZACAO;
-            }
-        } else if (tipo === 'funcao') {
-            const valorVal = parseFloat(input.getAttribute('data-valor')) || 0;
-            valorCalculado = valorVal * FATOR_ATUALIZACAO;
-        }
-        
-        totalCusto += qtd * valorCalculado;
-        if (valorCalculado > 0) temDestino = true;
-    });
-
-    const saldo = totalCredito - totalCusto;
-
-    document.getElementById('val-credito').innerText = totalCredito.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-    document.getElementById('val-custo').innerText = totalCusto.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-    document.getElementById('val-saldo').innerText = saldo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-
-    const msgBox = document.getElementById('status-mensagem');
+function extrairInfoLinha(box) {
+    const qtd = parseInt(box.querySelector('input[type="number"]').value) || 0;
+    const input = box.querySelector('.busca-input');
+    const nome = input.value;
+    const vinculo = box.getAttribute('data-vinculo') || 'puro';
     
-    // Só exibe o balanço de viabilidade quando houver escolha válida de ambos os lados
-    if (temOrigem && temDestino) {
-        msgBox.style.display = "block";
-        
-        // Cálculo técnico dos percentuais de eficiência
-        const pctEconomia = totalCredito > 0 ? ((saldo / totalCredito) * 100).toFixed(2).replace('.', ',') : '0,00';
-        const pctDeficit = totalCredito > 0 ? ((Math.abs(saldo) / totalCredito) * 100).toFixed(2).replace('.', ',') : (totalCusto > 0 ? '100,00' : '0,00');
-        const pctConsumo = totalCredito > 0 ? ((totalCusto / totalCredito) * 100).toFixed(2).replace('.', ',') : (totalCusto > 0 ? '100,00' : '0,00');
-
-        if (saldo >= 0) {
-            msgBox.className = "saldo-status status-positivo";
-            msgBox.innerHTML = `
-                <div style="display: flex; flex-direction: column; gap: 12px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.25); padding-bottom: 8px;">
-                        <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; opacity: 0.9;">Parecer de Viabilidade Técnica</span>
-                        <span style="background: rgba(255,255,255,0.25); padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; letter-spacing: 1px;">VIÁVEL</span>
-                    </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: center;">
-                        <div>
-                            <span style="font-size: 11px; text-transform: uppercase; opacity: 0.8; display: block; margin-bottom: 4px;">Saldo Técnico Remanescente</span>
-                            <span style="font-size: 22px; font-weight: 800; letter-spacing: -0.5px; display: block;">${saldo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
-                        </div>
-                        <div style="border-left: 1px solid rgba(255,255,255,0.25); padding-left: 20px;">
-                            <span style="font-size: 11px; text-transform: uppercase; opacity: 0.8; display: block; margin-bottom: 4px;">Métricas Orçamentárias</span>
-                            <span style="font-size: 13px; font-weight: 600; display: block; line-height: 1.45;">
-                                • Eficiência Gerada: <strong style="font-weight: 800;">+${pctEconomia}%</strong> do crédito<br>
-                                • Utilização da Margem: <strong style="font-weight: 800;">${pctConsumo}%</strong>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            `;
-        } else {
-            msgBox.className = "saldo-status status-negativo";
-            msgBox.innerHTML = `
-                <div style="display: flex; flex-direction: column; gap: 12px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.25); padding-bottom: 8px;">
-                        <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; opacity: 0.9;">Parecer de Viabilidade Técnica</span>
-                        <span style="background: rgba(255,255,255,0.25); padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; letter-spacing: 1px;">EXCEDIDO</span>
-                    </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: center;">
-                        <div>
-                            <span style="font-size: 11px; text-transform: uppercase; opacity: 0.8; display: block; margin-bottom: 4px;">Dotação Complementar Orçamental</span>
-                            <span style="font-size: 22px; font-weight: 800; letter-spacing: -0.5px; display: block;">${Math.abs(saldo).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
-                        </div>
-                        <div style="border-left: 1px solid rgba(255,255,255,0.25); padding-left: 20px;">
-                            <span style="font-size: 11px; text-transform: uppercase; opacity: 0.8; display: block; margin-bottom: 4px;">Métricas de Impacto</span>
-                            <span style="font-size: 13px; font-weight: 600; display: block; line-height: 1.45;">
-                                • Déficit Gerado: <strong style="color: #FFEEOO; font-weight: 800;">+${pctDeficit}%</strong> do limite<br>
-                                • Demanda Orçamentária: <strong style="color: #FFEEOO; font-weight: 800;">${pctConsumo}%</strong> do crédito
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-    } else {
-        msgBox.style.display = "none";
+    let val = 0;
+    if (input.getAttribute('data-tipo') === 'comissionado') {
+        const base = parseFloat(input.getAttribute('data-base')) || 0;
+        const rep = parseFloat(input.getAttribute('data-rep')) || 0;
+        val = (vinculo === 'puro' ? base + rep : rep) * FATOR_ATUALIZACAO;
+    } else if (input.getAttribute('data-tipo') === 'funcao') {
+        val = (parseFloat(input.getAttribute('data-valor')) || 0) * FATOR_ATUALIZACAO;
     }
+    
+    return { qtd, nome, vinculo, valor: val, total: qtd * val, valido: val > 0 && nome !== "" };
 }
 
-/* ==========================================
-   EXPORTAÇÃO DE IMAGEM
-   ========================================== */
-function exportarComoImagem() {
-    const containerElement = document.getElementById("conteudo-projeto");
-    const acoesLayout = document.querySelector(".acoes-inferiores");
+function calcularSandbox() {
+    let credito = 0;
+    let custo = 0;
 
-    // Oculta temporariamente elementos não-imprimíveis
-    acoesLayout.style.opacity = "0";
+    document.querySelectorAll('#container-origem .linha-cargo-box').forEach(box => {
+        credito += extrairInfoLinha(box).total;
+    });
 
-    html2canvas(containerElement, {
-        scale: 2, // Resolução premium
-        backgroundColor: "#071729", // Combina com o gradiente de fundo institucional
-        useCORS: true
-    }).then(canvas => {
-        acoesLayout.style.opacity = "1";
+    document.querySelectorAll('#container-destino .linha-cargo-box').forEach(box => {
+        custo += extrairInfoLinha(box).total;
+    });
 
+    const saldo = credito - custo;
+
+    document.getElementById('live-credito').innerText = formatarMoeda(credito);
+    document.getElementById('live-custo').innerText = formatarMoeda(custo);
+    
+    const saldoEl = document.getElementById('live-saldo');
+    saldoEl.innerHTML = `${formatarMoeda(saldo)} <span style="font-size: 13px; font-weight: 600; opacity: 0.8;">/mês</span>`;
+    saldoEl.style.color = saldo >= 0 ? '#4ade80' : '#f87171';
+    
+    const saldoAnoEl = document.getElementById('live-saldo-ano');
+    saldoAnoEl.innerText = `${formatarMoeda(saldo * 12)} /ano`;
+    saldoAnoEl.style.color = saldo >= 0 ? '#4ade80' : '#f87171';
+}
+
+function salvarCenario() {
+    let creditos = 0;
+    let custos = 0;
+    let descOrigem = [];
+    let descDestino = [];
+
+    // Captura Origem
+    document.querySelectorAll('#container-origem .linha-cargo-box').forEach(box => {
+        const info = extrairInfoLinha(box);
+        if (info.valido) {
+            creditos += info.total;
+            let vText = modoAtualGlobal === 'comissionado' ? (info.vinculo === 'puro' ? '(Puro)' : '(Efetivo)') : '';
+            descOrigem.push(`<li><strong>${info.qtd}x</strong> ${info.nome} <span style="opacity:0.8">${vText}</span></li>`);
+        }
+    });
+
+    // Captura Destino
+    document.querySelectorAll('#container-destino .linha-cargo-box').forEach(box => {
+        const info = extrairInfoLinha(box);
+        if (info.valido) {
+            custos += info.total;
+            let vText = modoAtualGlobal === 'comissionado' ? (info.vinculo === 'puro' ? '(Puro)' : '(Efetivo)') : '';
+            descDestino.push(`<li><strong>${info.qtd}x</strong> ${info.nome} <span style="opacity:0.8">${vText}</span></li>`);
+        }
+    });
+
+    if (descOrigem.length === 0 && descDestino.length === 0) {
+        mostrarToast("Preencha ao menos um cargo/função para salvar.", "danger");
+        return;
+    }
+
+    contadorCenarios++;
+    const id = contadorCenarios;
+    const saldo = creditos - custos;
+    const viavel = saldo >= 0;
+
+    let htmlListaOrigem = descOrigem.length > 0 ? `<ul>${descOrigem.join('')}</ul>` : '<span style="color: var(--text-main); margin-left: 6px;">Nenhum</span>';
+    let htmlListaDestino = descDestino.length > 0 ? `<ul>${descDestino.join('')}</ul>` : '<span style="color: var(--text-main); margin-left: 6px;">Nenhum</span>';
+
+    const cardHTML = `
+        <div class="cenario-card" id="cenario-${id}">
+            <div class="export-header">
+                <img src="https://i.ibb.co/FkLCjrFV/Capturar-removebg-preview-1.png" alt="Logo">
+                <div style="width: 2px; height: 30px; background: #e2e8f0;"></div>
+                <img src="https://i.ibb.co/yc32bwv5/Logo-DGF-upscaled-Photoroom.png" alt="Logo DGF">
+            </div>
+
+            <div class="cenario-header">
+                <h3 class="cenario-titulo" contenteditable="true" onblur="if(this.innerText.trim()==='') this.innerText='Cenário ${id}'">
+                    Cenário ${id} <span style="font-size: 12px; color: var(--text-light);">✎</span>
+                </h3>
+                <button class="btn-remover-cenario" onclick="document.getElementById('cenario-${id}').remove()" title="Excluir">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path></svg>
+                </button>
+            </div>
+
+            <div class="cenario-mini-resumo">
+                <div style="margin-bottom: 12px;">
+                    <strong class="label-resumo" style="color: var(--danger);">Sai (Extinguidos):</strong> 
+                    ${htmlListaOrigem}
+                </div>
+                <div>
+                    <strong class="label-resumo" style="color: var(--success);">Entra (Criados):</strong> 
+                    ${htmlListaDestino}
+                </div>
+            </div>
+
+            <div class="balanco-vertical calibri-values">
+                <div class="balanco-item">
+                    <span style="color: var(--text-muted);">Valor dos Cargos/Funções atuais</span>
+                    <!-- AQUI: Cor cinza para o Crédito -->
+                    <strong style="color: var(--text-muted); font-size: 15px;">${formatarMoeda(creditos)}</strong>
+                </div>
+                <div class="balanco-item">
+                    <span style="color: var(--text-muted);">Custo dos Cargos/Funções novos</span>
+                    <!-- AQUI: Cor cinza para o Custo -->
+                    <strong style="color: var(--text-muted); font-size: 15px;">${formatarMoeda(custos)}</strong>
+                </div>
+                
+                <div class="balanco-item saldo" style="border-color: ${viavel ? 'rgba(5,150,105,0.4)' : 'rgba(239,68,68,0.4)'}; padding: 20px 16px;">
+                    <span style="color: var(--text-muted); font-weight: 700; font-size: 12px; letter-spacing: 1px;">IMPACTO</span>
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                        
+                        <!-- ========================================== -->
+                        <!-- AQUI VOCÊ CONTROLA O TAMANHO DO MÊS        -->
+                        <!-- ========================================== -->
+                        <strong style="color: ${viavel ? 'var(--success)' : 'var(--danger)'}; font-size: 12px; line-height: 1;">
+                            ${formatarMoeda(saldo)} 
+                            <span style="font-size: 12px; font-weight: 600; opacity: 0.8; text-transform: uppercase;">/mês</span>
+                        </strong>
+                        
+                        <!-- ========================================== -->
+                        <!-- AQUI VOCÊ CONTROLA O TAMANHO DO ANO        -->
+                        <!-- ========================================== -->
+                        <strong style="color: ${viavel ? 'var(--success)' : 'var(--danger)'}; font-size: 20px; line-height: 1;">
+                            ${formatarMoeda(saldo * 12)} 
+                            <span style="font-size: 13px; font-weight: 600; opacity: 0.8; text-transform: uppercase;">/ano</span>
+                        </strong>
+
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn-exportar-cenario" onclick="exportarCenario(${id})">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Exportar Este Cenário
+            </button>
+        </div>
+    `;
+
+    document.getElementById('scenarios-grid').insertAdjacentHTML('beforeend', cardHTML);
+    
+    // Rolar a tela suavemente para mostrar o novo cenário
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    mostrarToast(`Cenário ${id} salvo com sucesso!`);
+}
+
+function exportarCenario(id) {
+    const box = document.getElementById(`cenario-${id}`);
+    const tituloEl = box.querySelector('.cenario-titulo').innerText.replace('✎','').trim();
+    const nomeArquivo = tituloEl.replace(/\s+/g, '_');
+
+    box.classList.add("exporting");
+
+    html2canvas(box, { scale: 2, backgroundColor: "#ffffff", useCORS: true }).then(canvas => {
+        box.classList.remove("exporting");
         const link = document.createElement("a");
-        link.download = "Proposta_Transformacao_Cargos_TJPE.png";
+        link.download = `Cenario_${nomeArquivo}.png`;
         link.href = canvas.toDataURL("image/png");
         link.click();
-        
-        mostrarToast("Proposta exportada como imagem com sucesso!", "success");
-    }).catch(err => {
-        acoesLayout.style.opacity = "1";
-        mostrarToast("Erro ao tentar gerar imagem da proposta.", "danger");
+        mostrarToast("Cenário exportado!");
     });
 }
 
-// Fechamento de listas ao clicar fora
-document.addEventListener('click', function(e) {
-    if (!e.target.closest('.dropdown-combobox') && !e.target.classList.contains('busca-input')) {
-        document.querySelectorAll('.sugestoes-lista').forEach(lista => {
-            lista.style.display = 'none';
-        });
+// Fechamento combos
+document.addEventListener('click', e => {
+    if (!e.target.closest('.dropdown-combobox')) {
+        document.querySelectorAll('.sugestoes-lista').forEach(l => l.style.display = 'none');
     }
 });
 
-window.onload = function() {
+// Start
+window.onload = () => {
     adicionarLinha('origem');
     adicionarLinha('destino');
-}
+    calcularSandbox();
+};
 </script>
 </body>
 </html>
