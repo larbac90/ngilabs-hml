@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Auxílio Saúde</title>
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-light: #eff6ff;
+            --text-main: #1f2937;
+            --text-muted: #4b5563;
+            --bg-page: #f9fafb;
+            --bg-card: #ffffff;
+            --border: #e5e7eb;
+            --success: #059669;
+            --success-light: #ecfdf5;
+            --warning: #d97706;
+            --warning-light: #fef3c7;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-page); color: var(--text-main); padding: 2rem 1rem; }
+        .container { max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        .header { grid-column: 1 / -1; text-align: center; margin-bottom: 1rem; }
+        .header h1 { font-size: 1.75rem; color: var(--primary); font-weight: 600; margin-bottom: 0.5rem; }
+        .card { background: var(--bg-card); padding: 1.5rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); border: 1px solid var(--border); }
+        .card h2 { font-size: 1.15rem; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; color: var(--primary); }
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-main); font-size: 0.9rem; }
+        select, input[type="number"] { width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 4px; font-size: 0.95rem; }
+        select:focus, input:focus { outline: none; border-color: var(--primary); }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        
+        .toggle-container { display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 1.5rem; background: var(--primary-light); padding: 1rem; border-radius: 8px; }
+        .toggle-label { font-weight: 600; font-size: 0.95rem; color: var(--text-muted); cursor: pointer; }
+        .toggle-label.active { color: var(--primary); }
+        .switch { position: relative; display: inline-block; width: 50px; height: 24px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--primary); transition: .4s; border-radius: 24px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(26px); }
+
+        .checkbox-group { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem; }
+        .checkbox-group input { width: 1.2rem; height: 1.2rem; cursor: pointer; }
+        .checkbox-group label { margin: 0; font-weight: 400; cursor: pointer; }
+
+        .results-container { display: flex; flex-direction: column; gap: 0.75rem; }
+        .result-box { padding: 1rem; border-radius: 6px; border: 1px solid var(--border); background: #f9fafb; display: flex; justify-content: space-between; align-items: center; }
+        .result-box .label { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; }
+        .result-box .value { font-size: 1.15rem; font-weight: 700; color: var(--text-main); }
+        .result-box.highlight { background: var(--success-light); border-color: var(--success); }
+        .result-box.highlight .value { color: var(--success); font-size: 1.5rem; }
+        
+        .alert { padding: 0.75rem; border-radius: 6px; font-size: 0.85rem; margin-top: 0.5rem; display: none; }
+        .alert-warning { background: var(--warning-light); color: var(--warning); border: 1px solid #fcd34d; display: block; }
+        .alert-info { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; display: block; }
+
+        .hidden { display: none !important; }
+
+        @media (max-width: 768px) {
+            .container { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Simulador de Auxílio Saúde</h1>
+            <p style="color: var(--text-muted); font-size: 0.95rem;">Análise de cenários de reembolso institucional</p>
+        </div>
+
+        <div class="card">
+            <h2>Dados Funcionais</h2>
+            
+            <div class="toggle-container">
+                <span class="toggle-label active" id="labelEfetivo" onclick="setVinculo('efetivo')">Efetivo</span>
+                <label class="switch">
+                    <input type="checkbox" id="vinculoToggle" onchange="toggleVinculo()">
+                    <span class="slider"></span>
+                </label>
+                <span class="toggle-label" id="labelComissionado" onclick="setVinculo('comissionado')">Comissionado</span>
+            </div>
+
+            <!-- Campos Efetivo -->
+            <div id="camposEfetivo">
+                <div class="form-group">
+                    <label for="cargo">Cargo</label>
+                    <select id="cargo">
+                        <option value="auxiliar">Auxiliar</option>
+                        <option value="tecnico">Técnico</option>
+                        <option value="oficial_pjIII">Oficial PJ III</option>
+                        <option value="analista_oficial">Analista / Oficial</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="padrao">Padrão</label>
+                    <select id="padrao"></select>
+                </div>
+            </div>
+
+            <!-- Campos Comissionado -->
+            <div id="camposComissionado" class="hidden">
+                <div class="form-group">
+                    <label for="cargoComissionado">Cargo Comissionado</label>
+                    <select id="cargoComissionado"></select>
+                </div>
+            </div>
+            
+            <div class="grid-2">
+                <div class="form-group">
+                    <label for="idade">Idade (anos)</label>
+                    <input type="number" id="idade" value="30" min="0" max="120">
+                </div>
+                <div class="form-group">
+                    <label for="valorPlano">Mensalidade do Plano (R$)</label>
+                    <input type="number" id="valorPlano" value="800.00" step="10.00" min="0">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="doencaGrave">
+                    <label for="doencaGrave">Portador de Doença Grave</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="card results-container">
+            <h2>Demonstrativo de Cálculo</h2>
+            
+            <div class="result-box">
+                <div>
+                    <div class="label">Teto Remuneração (Base 10%)</div>
+                    <div style="font-size:0.75rem; color:var(--text-muted)" id="salarioBaseRef">Base de Cálculo: R$ 0,00</div>
+                </div>
+                <div class="value" id="resTetoSalario">R$ 0,00</div>
+            </div>
+            <div id="alertaAcrescimo" class="alert alert-warning hidden">
+                <strong>Observação:</strong> Aplicado acréscimo de 50% sobre o teto remuneratório (condição: Idade > 50 anos ou Doença Grave).
+            </div>
+            
+            <div class="result-box">
+                <div>
+                    <div class="label">Teto Faixa Etária</div>
+                    <div style="font-size:0.75rem; color:var(--text-muted)" id="faixaRef">Faixa: --</div>
+                </div>
+                <div class="value" id="resTetoIdade">R$ 0,00</div>
+            </div>
+            
+            <div class="result-box">
+                <div class="label">Valor Comprovado (Plano)</div>
+                <div class="value" id="resPlano">R$ 0,00</div>
+            </div>
+            
+            <div class="result-box highlight">
+                <div>
+                    <div class="label" style="color: var(--success)">Valor a Restituir</div>
+                    <div style="font-size:0.7rem; font-weight:normal; color:#065f46;">(Menor valor entre os cenários)</div>
+                </div>
+                <div class="value" id="resFinal">R$ 0,00</div>
+            </div>
+
+            <div id="sugestaoPlano" class="alert alert-info hidden" style="margin-top: 1rem;">
+                <strong>Sugestão Estratégica:</strong> O valor do seu reembolso atual é igual à mensalidade do plano. Como os limites institucionais (10% e Faixa Etária) são maiores, há margem para migrar para um plano de categoria superior (mais caro) sem impacto financeiro direto, absorvendo maior subsídio.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Fatores de atualização ocultos no código
+        const FATOR_ATUALIZACAO_SALARIO = 1.053; // Para os cargos Efetivos
+        const FATOR_ATUALIZACAO_COMISSIONADOS = 1.0; // Para os cargos Comissionados
+        const FATOR_ATUALIZACAO_SAUDE = 1.0; // Para a tabela de Idade
+
+        const tabelaSalarial = [
+            {p: "P00", auxiliar: 5565.92, tecnico: 5858.86, oficial_pjIII: 7252.72, analista_oficial: 7634.45},
+            {p: "P01", auxiliar: 5705.07, tecnico: 6005.32, oficial_pjIII: 7434.03, analista_oficial: 7825.32},
+            {p: "P02", auxiliar: 5856.24, tecnico: 6164.45, oficial_pjIII: 7631.04, analista_oficial: 8032.69},
+            {p: "P03", auxiliar: 6020.23, tecnico: 6337.08, oficial_pjIII: 7844.72, analista_oficial: 8257.59},
+            {p: "P04", auxiliar: 6197.83, tecnico: 6524.04, oficial_pjIII: 8076.13, analista_oficial: 8501.20},
+            {p: "P05", auxiliar: 6389.93, tecnico: 6726.26, oficial_pjIII: 8326.49, analista_oficial: 8764.72},
+            {p: "P06", auxiliar: 6597.61, tecnico: 6944.85, oficial_pjIII: 8597.11, analista_oficial: 9049.60},
+            {p: "P07", auxiliar: 6821.91, tecnico: 7181.00, oficial_pjIII: 8889.42, analista_oficial: 9357.29},
+            {p: "P08", auxiliar: 7064.12, tecnico: 7435.92, oficial_pjIII: 9204.99, analista_oficial: 9689.45},
+            {p: "P09", auxiliar: 7325.47, tecnico: 7711.05, oficial_pjIII: 9545.58, analista_oficial: 10047.97},
+            {p: "P10", auxiliar: 7607.51, tecnico: 8007.94, oficial_pjIII: 9913.07, analista_oficial: 10434.83},
+            {p: "P11", auxiliar: 7911.82, tecnico: 8328.22, oficial_pjIII: 10309.59, analista_oficial: 10852.20},
+            {p: "P12", auxiliar: 8386.53, tecnico: 8827.94, oficial_pjIII: 10928.18, analista_oficial: 11503.34},
+            {p: "P13", auxiliar: 8973.59, tecnico: 9445.90, oficial_pjIII: 11693.13, analista_oficial: 12308.58},
+            {p: "P14", auxiliar: 9691.46, tecnico: 10201.54, oficial_pjIII: 12628.60, analista_oficial: 13293.27},
+            {p: "P15", auxiliar: 10563.73, tecnico: 11119.71, oficial_pjIII: 13765.15, analista_oficial: 14489.66},
+            {p: "P16", auxiliar: 11620.08, tecnico: 12231.66, oficial_pjIII: 15141.69, analista_oficial: 15938.64},
+            {p: "P17", auxiliar: 12898.30, tecnico: 13577.14, oficial_pjIII: 16807.28, analista_oficial: 17691.87},
+            {p: "P18", auxiliar: 14446.06, tecnico: 15206.39, oficial_pjIII: 18824.14, analista_oficial: 19814.88},
+            {p: "P19", auxiliar: 16324.07, tecnico: 17183.24, oficial_pjIII: 21271.28, analista_oficial: 22390.82},
+            {p: "P20", auxiliar: 18609.46, tecnico: 19588.89, oficial_pjIII: 24249.28, analista_oficial: 25525.53},
+            {p: "P21", auxiliar: 21400.86, tecnico: 22527.23, oficial_pjIII: 27886.68, analista_oficial: 29354.38}
+        ];
+
+        const comissionadosData = [
+            {s: "APJC", b: 1319.77, r: 1583.72},
+            {s: "DGAPJC", b: 12260.68, r: 14712.82},
+            {s: "DGPJC", b: 13078.07, r: 15693.68},
+            {s: "DASPJC", b: 7028.09, r: 8433.71},
+            {s: "DSPJC", b: 7590.35, r: 9108.42},
+            {s: "MPJC", b: 6559.35, r: 7871.22},
+            {s: "PJC", b: 8433.72, r: 10120.46},
+            {s: "PJC-II", b: 7590.35, r: 9108.42},
+            {s: "PJC-III", b: 7028.09, r: 8433.71},
+            {s: "PJC-IV", b: 4216.80, r: 5060.16},
+            {s: "PJC-V", b: 3092.36, r: 3710.83},
+            {s: "PJC-VI", b: 2634.71, r: 3161.65},
+            {s: "PJC-VII", b: 2266.58, r: 2719.90},
+            {s: "SPJC", b: 8996.05, r: 10795.26}
+        ];
+
+        const tabelaIdade = [
+            { min: 0, max: 18, val: 383.60, label: "00 a 18" },
+            { min: 19, max: 23, val: 479.49, label: "19 a 23" },
+            { min: 24, max: 28, val: 599.34, label: "24 a 28" },
+            { min: 29, max: 33, val: 659.29, label: "29 a 33" },
+            { min: 34, max: 38, val: 692.24, label: "34 a 38" },
+            { min: 39, max: 43, val: 761.47, label: "39 a 43" },
+            { min: 44, max: 48, val: 951.82, label: "44 a 48" },
+            { min: 49, max: 53, val: 1047.01, label: "49 a 53" },
+            { min: 54, max: 58, val: 1308.79, label: "54 a 58" },
+            { min: 59, max: 999, val: 2290.38, label: "A partir de 59" }
+        ];
+
+        const formatBRL = (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+
+        const els = {
+            cargo: document.getElementById('cargo'),
+            padrao: document.getElementById('padrao'),
+            cargoComissionado: document.getElementById('cargoComissionado'),
+            idade: document.getElementById('idade'),
+            valorPlano: document.getElementById('valorPlano'),
+            doencaGrave: document.getElementById('doencaGrave')
+        };
+
+        // Função para repopular os dropdowns apenas com as siglas
+        function atualizarDropdowns() {
+            const padraoAtual = els.padrao.value;
+            
+            els.padrao.innerHTML = '';
+            tabelaSalarial.forEach(row => {
+                els.padrao.appendChild(new Option(row.p, row.p));
+            });
+            if (padraoAtual && Array.from(els.padrao.options).some(opt => opt.value === padraoAtual)) {
+                els.padrao.value = padraoAtual;
+            }
+
+            if (els.cargoComissionado.options.length === 0) {
+                comissionadosData.forEach(row => {
+                    els.cargoComissionado.appendChild(new Option(row.s, row.s));
+                });
+            }
+        }
+
+        els.cargo.addEventListener('change', () => {
+            atualizarDropdowns();
+            calcularReembolso();
+        });
+
+        // Controles de Vínculo
+        const toggle = document.getElementById('vinculoToggle');
+        function setVinculo(tipo) {
+            toggle.checked = tipo === 'comissionado';
+            toggleVinculo();
+        }
+        function toggleVinculo() {
+            const isComissionado = toggle.checked;
+            document.getElementById('labelEfetivo').classList.toggle('active', !isComissionado);
+            document.getElementById('labelComissionado').classList.toggle('active', isComissionado);
+            
+            if (isComissionado) {
+                document.getElementById('camposEfetivo').classList.add('hidden');
+                document.getElementById('camposComissionado').classList.remove('hidden');
+            } else {
+                document.getElementById('camposEfetivo').classList.remove('hidden');
+                document.getElementById('camposComissionado').classList.add('hidden');
+            }
+            calcularReembolso();
+        }
+
+        function calcularReembolso() {
+            const isComissionado = toggle.checked;
+            let salarioAtualizado = 0;
+
+            if (isComissionado) {
+                const comissionadoRow = comissionadosData.find(c => c.s === els.cargoComissionado.value);
+                const salarioBase = comissionadoRow ? (comissionadoRow.b + comissionadoRow.r) : 0;
+                salarioAtualizado = salarioBase * FATOR_ATUALIZACAO_COMISSIONADOS;
+            } else {
+                const efetivoRow = tabelaSalarial.find(s => s.p === els.padrao.value);
+                const salarioBase = efetivoRow ? efetivoRow[els.cargo.value] : 0;
+                salarioAtualizado = salarioBase * FATOR_ATUALIZACAO_SALARIO;
+            }
+            
+            let tetoRemuneracao = salarioAtualizado * 0.10;
+            
+            const idade = parseInt(els.idade.value) || 0;
+            const doencaGrave = els.doencaGrave.checked;
+            let teveAcrescimo = false;
+
+            if (idade > 50 || doencaGrave) {
+                tetoRemuneracao += (tetoRemuneracao * 0.50);
+                teveAcrescimo = true;
+            }
+
+            const planoVal = parseFloat(els.valorPlano.value) || 0;
+            const linhaIdade = tabelaIdade.find(i => idade >= i.min && idade <= i.max);
+            const valorIdadeBase = linhaIdade ? linhaIdade.val : 0;
+            const tetoIdade = valorIdadeBase * FATOR_ATUALIZACAO_SAUDE;
+
+            const reembolso = Math.min(tetoRemuneracao, tetoIdade, planoVal);
+
+            document.getElementById('resTetoSalario').textContent = formatBRL(tetoRemuneracao);
+            document.getElementById('salarioBaseRef').textContent = `Base de Cálculo Atualizada: ${formatBRL(salarioAtualizado)}`;
+            
+            const alerta = document.getElementById('alertaAcrescimo');
+            if (teveAcrescimo) {
+                alerta.classList.remove('hidden');
+                let motivo = [];
+                if (idade > 50) motivo.push("> 50 anos");
+                if (doencaGrave) motivo.push("Doença Grave");
+                alerta.innerHTML = `<strong>Observação:</strong> Aplicado acréscimo de 50% no teto remuneratório (${motivo.join(' e ')}).`;
+            } else {
+                alerta.classList.add('hidden');
+            }
+            
+            document.getElementById('resTetoIdade').textContent = formatBRL(tetoIdade);
+            document.getElementById('faixaRef').textContent = `Faixa: ${linhaIdade ? linhaIdade.label : "--"}`;
+            document.getElementById('resPlano').textContent = formatBRL(planoVal);
+            document.getElementById('resFinal').textContent = formatBRL(reembolso);
+
+            const sugestao = document.getElementById('sugestaoPlano');
+            if (reembolso === planoVal && planoVal < tetoRemuneracao && planoVal < tetoIdade) {
+                const margem = Math.min(tetoRemuneracao, tetoIdade) - planoVal;
+                sugestao.innerHTML = `<strong>💡 Sugestão Estratégica:</strong> Você ainda possui margem institucional. É possível melhorar o seu plano de saúde (aumentar em até <strong>${formatBRL(margem)}</strong> na mensalidade) sem que haja impacto financeiro direto em folha, pois os limites permitem um reembolso maior.`;
+                sugestao.classList.remove('hidden');
+            } else {
+                sugestao.classList.add('hidden');
+            }
+        }
+
+        // Initialize App
+        atualizarDropdowns();
+        
+        Object.values(els).forEach(el => {
+            if (el !== els.cargo) {
+                el.addEventListener('input', calcularReembolso);
+                el.addEventListener('change', calcularReembolso);
+            }
+        });
+
+        calcularReembolso();
+    </script>
+</body>
+</html>
