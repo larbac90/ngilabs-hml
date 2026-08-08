@@ -323,7 +323,7 @@
             if (teveAcrescimo) {
                 alerta.classList.remove('hidden');
                 let motivo = [];
-                if (idade > 50) motivo.push("> 50 anos");
+                if (idade > 49) motivo.push("> 50 anos");
                 if (doencaGrave) motivo.push("Doença Grave");
                 alerta.innerHTML = `<strong>Observação:</strong> Aplicado acréscimo de 50% no teto remuneratório (${motivo.join(' e ')}).`;
             } else {
