@@ -56,6 +56,17 @@
         .alert-warning { background: var(--warning-light); color: var(--warning); border: 1px solid #fcd34d; display: block; }
         .alert-info { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; display: block; }
 
+        .btn-outline { background: transparent; border: 1px solid var(--primary); color: var(--primary); padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.85rem; font-weight: 600; transition: all 0.2s; width: 100%; text-align: center; margin-top: 0.5rem; display: block; }
+        .btn-outline:hover { background: var(--primary-light); }
+
+        .table-container { margin-top: 1rem; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--border); }
+        th { background-color: var(--primary-light); color: var(--primary); font-weight: 600; }
+        td.text-right, th.text-right { text-align: right; }
+        tr:last-child td { border-bottom: none; }
+        tr:nth-child(even) { background-color: #f9fafb; }
+
         .hidden { display: none !important; }
 
         @media (max-width: 768px) {
@@ -164,6 +175,22 @@
             <div id="sugestaoPlano" class="alert alert-info hidden" style="margin-top: 1rem;">
                 <strong>Sugestão Estratégica:</strong> O valor do seu reembolso atual é igual à mensalidade do plano. Como os limites institucionais (10% e Faixa Etária) são maiores, há margem para migrar para um plano de categoria superior (mais caro) sem impacto financeiro direto, absorvendo maior subsídio.
             </div>
+
+            <button id="btnToggleTabela" class="btn-outline">Ver Tabela de Faixas Etárias</button>
+            
+            <div id="containerTabelaIdade" class="table-container hidden">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Faixa Etária (Anos)</th>
+                            <th class="text-right">Valor Limite (R$)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyIdades">
+                        <!-- Preenchido via JS -->
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -239,6 +266,36 @@
             doencaGrave: document.getElementById('doencaGrave')
         };
 
+        // Popular Tabela de Idades no HTML
+        const tbodyIdades = document.getElementById('tbodyIdades');
+        tabelaIdade.forEach(faixa => {
+            const tr = document.createElement('tr');
+            
+            const tdFaixa = document.createElement('td');
+            tdFaixa.textContent = faixa.label;
+            
+            const tdValor = document.createElement('td');
+            tdValor.className = 'text-right';
+            const valorAtualizado = faixa.val * FATOR_ATUALIZACAO_SAUDE;
+            tdValor.textContent = formatBRL(valorAtualizado);
+            
+            tr.appendChild(tdFaixa);
+            tr.appendChild(tdValor);
+            tbodyIdades.appendChild(tr);
+        });
+
+        // Toggle da Tabela de Idades
+        const btnToggleTabela = document.getElementById('btnToggleTabela');
+        const containerTabelaIdade = document.getElementById('containerTabelaIdade');
+        btnToggleTabela.addEventListener('click', () => {
+            containerTabelaIdade.classList.toggle('hidden');
+            if(containerTabelaIdade.classList.contains('hidden')) {
+                btnToggleTabela.textContent = 'Ver Tabela de Faixas Etárias';
+            } else {
+                btnToggleTabela.textContent = 'Ocultar Tabela de Faixas Etárias';
+            }
+        });
+
         // Função para repopular os dropdowns apenas com as siglas
         function atualizarDropdowns() {
             const padraoAtual = els.padrao.value;
@@ -304,7 +361,7 @@
             const doencaGrave = els.doencaGrave.checked;
             let teveAcrescimo = false;
 
-            if (idade > 50 || doencaGrave) {
+            if (idade > 49 || doencaGrave) {
                 tetoRemuneracao += (tetoRemuneracao * 0.50);
                 teveAcrescimo = true;
             }
@@ -323,7 +380,7 @@
             if (teveAcrescimo) {
                 alerta.classList.remove('hidden');
                 let motivo = [];
-                if (idade > 49) motivo.push("> 50 anos");
+                if (idade > 50) motivo.push("> 50 anos");
                 if (doencaGrave) motivo.push("Doença Grave");
                 alerta.innerHTML = `<strong>Observação:</strong> Aplicado acréscimo de 50% no teto remuneratório (${motivo.join(' e ')}).`;
             } else {
