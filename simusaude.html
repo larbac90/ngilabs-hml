@@ -127,14 +127,22 @@
 
             <!-- Campos Efetivo -->
             <div id="camposEfetivo">
-                <div class="form-group">
-                    <label for="cargo">Cargo</label>
-                    <select id="cargo">
-                        <option value="auxiliar">Auxiliar</option>
-                        <option value="tecnico">Técnico</option>
-                        <option value="oficial_pjIII">Oficial PJ III</option>
-                        <option value="analista_oficial">Analista / Oficial</option>
-                    </select>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="cargo">Cargo</label>
+                        <select id="cargo">
+                            <option value="auxiliar">Auxiliar</option>
+                            <option value="tecnico">Técnico</option>
+                            <option value="oficial_pjIII">Oficial PJ III</option>
+                            <option value="analista_oficial">Analista / Oficial</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="funcaoComissionada">Cargo Comissionado</label>
+                        <select id="funcaoComissionada">
+                            <option value="">Sem cargo comissionado</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="padrao">Padrão</label>
@@ -421,6 +429,7 @@
 
         const els = {
             cargo: document.getElementById('cargo'),
+            funcaoComissionada: document.getElementById('funcaoComissionada'),
             padrao: document.getElementById('padrao'),
             cargoComissionado: document.getElementById('cargoComissionado'),
             idade: document.getElementById('idade'),
@@ -564,6 +573,12 @@
                     els.cargoComissionado.appendChild(new Option(row.s, row.s));
                 });
             }
+
+            if (els.funcaoComissionada.options.length === 1) {
+                comissionadosData.forEach(row => {
+                    els.funcaoComissionada.appendChild(new Option(row.s, row.s));
+                });
+            }
         }
 
         els.cargo.addEventListener('change', () => {
@@ -596,6 +611,7 @@
             let salarioAtualizado = 0;
             let baseSalarioSemAQ = 0;
             let valorAQ = 0;
+            let valorRepresentacao = 0;
 
             if (isComissionado) {
                 const comissionadoRow = comissionadosData.find(c => c.s === els.cargoComissionado.value);
@@ -607,6 +623,15 @@
                 const salarioBase = efetivoRow ? efetivoRow[els.cargo.value] : 0;
                 baseSalarioSemAQ = salarioBase * FATOR_ATUALIZACAO_SALARIO;
 
+                // Verifica a Representação da Função Comissionada escolhida
+                const funcaoSel = els.funcaoComissionada.value;
+                if (funcaoSel) {
+                    const funcData = comissionadosData.find(c => c.s === funcaoSel);
+                    if (funcData) {
+                        valorRepresentacao = funcData.r * FATOR_ATUALIZACAO_COMISSIONADOS;
+                    }
+                }
+
                 // Calcula o AQ
                 if (els.aq3.checked) {
                     valorAQ = baseSalarioSemAQ * 0.03;
@@ -614,16 +639,22 @@
                     valorAQ = baseSalarioSemAQ * 0.045;
                 }
 
-                salarioAtualizado = baseSalarioSemAQ + valorAQ;
+                salarioAtualizado = baseSalarioSemAQ + valorAQ + valorRepresentacao;
             }
 
             const idadeTitular = parseInt(els.idade.value) || 0;
             const depElements = document.querySelectorAll('.dependente-item');
             
-            // Textos informativos dinâmicos com ou sem AQ
+            // Textos informativos dinâmicos com ou sem AQ/Representação
             let textoBaseRef = `Base: ${formatBRL(baseSalarioSemAQ)}`;
+            if (valorRepresentacao > 0) {
+                textoBaseRef += ` + Rep: ${formatBRL(valorRepresentacao)}`;
+            }
             if (valorAQ > 0) {
-                textoBaseRef += ` + AQ: ${formatBRL(valorAQ)} = Total: ${formatBRL(salarioAtualizado)}`;
+                textoBaseRef += ` + AQ: ${formatBRL(valorAQ)}`;
+            }
+            if (valorRepresentacao > 0 || valorAQ > 0) {
+                textoBaseRef += ` = Total: ${formatBRL(salarioAtualizado)}`;
             }
 
             if (activeTab === 'padrao') {
