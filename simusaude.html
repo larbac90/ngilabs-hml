@@ -55,8 +55,8 @@
         .checkbox-group label { margin: 0; font-weight: 400; cursor: pointer; }
 
         .results-container { display: flex; flex-direction: column; gap: 0.75rem; }
-        .result-box { padding: 1rem; border-radius: 6px; border: 1px solid var(--border); background: #f9fafb; display: flex; justify-content: space-between; align-items: center; }
-        .result-box .label { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; }
+        .result-box { padding: 1rem; border-radius: 6px; border: 1px solid var(--border); background: #f9fafb; display: flex; justify-content: space-between; align-items: center; transition: background 0.3s; }
+        .result-box .label { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; transition: color 0.3s; }
         .result-box .value { font-size: 1.15rem; font-weight: 700; color: var(--text-main); }
         .result-box.highlight { background: var(--success-light); border-color: var(--success); }
         .result-box.highlight .value { color: var(--success); font-size: 1.5rem; }
@@ -66,7 +66,7 @@
 
         /* Estilo para detalhamento dos dependentes no demonstrativo */
         .detalhe-container { margin-left: 1rem; border-left: 2px solid var(--border); padding-left: 0.75rem; display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0; margin-bottom: 0.25rem; }
-        .detalhe-item { font-size: 0.8rem; display: flex; justify-content: space-between; color: var(--text-muted); background: #ffffff; padding: 0.4rem 0.6rem; border-radius: 4px; border: 1px dashed var(--border); }
+        .detalhe-item { font-size: 0.8rem; display: flex; justify-content: space-between; align-items: center; color: var(--text-muted); background: #ffffff; padding: 0.4rem 0.6rem; border-radius: 4px; border: 1px dashed var(--border); }
         .detalhe-item span.title { font-weight: 600; color: var(--text-main); }
 
         .alert { padding: 0.75rem; border-radius: 6px; font-size: 0.85rem; margin-top: 0.5rem; display: none; }
@@ -140,6 +140,21 @@
                     <label for="padrao">Padrão</label>
                     <select id="padrao"></select>
                 </div>
+                
+                <!-- Adicional de Qualificação -->
+                <div class="form-group">
+                    <label>Adicional de Qualificação (AQ)</label>
+                    <div style="display: flex; gap: 1.5rem;">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="aq3">
+                            <label for="aq3">3%</label>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="aq45">
+                            <label for="aq45">4,5%</label>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Campos Comissionado -->
@@ -180,6 +195,8 @@
             
             <!-- Visível apenas na Aba Padrão -->
             <div id="painelPadrao">
+                
+                <!-- Critério 1: Teto Remuneração -->
                 <div class="result-box">
                     <div>
                         <div class="label">Teto Remuneração (Base 10%)</div>
@@ -191,32 +208,29 @@
                     <strong>Observação:</strong> Aplicado acréscimo de 50% sobre o teto remuneratório (condição: Idade > 49 anos ou Doença Grave).
                 </div>
                 
-                <!-- Caixa Titular Individual (Oculta se houver dependentes) -->
-                <div id="boxTetoIdadeTitular" class="result-box" style="margin-top:0.75rem;">
+                <!-- Critério 2: Teto Faixa Etária (Dinâmico para Ind/Total) -->
+                <div class="result-box" id="boxTetoIdade" style="margin-top:0.75rem;">
                     <div>
-                        <div class="label">Teto Faixa Etária (Titular)</div>
-                        <div style="font-size:0.75rem; color:var(--text-muted)" id="faixaRefTitular">Faixa: --</div>
+                        <div class="label" id="lblTetoIdade">Teto Faixa Etária (Titular)</div>
+                        <div style="font-size:0.75rem; color:var(--text-muted)" id="descTetoIdade">Faixa: --</div>
                     </div>
-                    <div class="value" id="resTetoIdadeTitular">R$ 0,00</div>
+                    <div class="value" id="resTetoIdade">R$ 0,00</div>
                 </div>
-
-                <!-- Card Total (Titular + Dep) - Visível somente quando houver dependentes -->
-                <div id="boxTetoIdadeTotal" class="result-box hidden" style="margin-top:0.75rem; background: #f3f4f6;">
+                <!-- Detalhamento exclusivo das faixas etárias -->
+                <div id="detalhesTetoIdadePadrao" class="detalhe-container hidden"></div>
+                
+                <!-- Critério 3: Valor Comprovado Plano (Dinâmico para Ind/Total) -->
+                <div class="result-box" id="boxPlano" style="margin-top:0.75rem;">
                     <div>
-                        <div class="label">Teto Faixas Etárias Total (Titular + Dep.)</div>
-                        <div style="font-size:0.75rem; color:var(--text-muted)">Soma dos limites por idade</div>
+                        <div class="label" id="lblPlano">Valor Comprovado (Mensalidade)</div>
+                        <div style="font-size:0.75rem; color:var(--text-muted)" id="descPlano">Apenas Titular</div>
                     </div>
-                    <div class="value" id="resTetoIdadeTotal">R$ 0,00</div>
-                </div>
-                
-                <!-- Detalhamento dos Dependentes no Padrão (Abaixo do Total) -->
-                <div id="detalhesDepPadrao" class="detalhe-container hidden"></div>
-                
-                <div class="result-box" style="margin-top:0.75rem;">
-                    <div class="label">Valor Comprovado Total (Mensalidades)</div>
                     <div class="value" id="resPlano">R$ 0,00</div>
                 </div>
+                <!-- Detalhamento exclusivo dos valores dos planos -->
+                <div id="detalhesPlanoPadrao" class="detalhe-container hidden"></div>
                 
+                <!-- Resultado Final Padrão -->
                 <div class="result-box highlight" style="margin-top:0.75rem;">
                     <div>
                         <div class="label" style="color: var(--success)">Valor a Restituir</div>
@@ -258,26 +272,16 @@
                     <div class="value" id="resSassepeSalario">R$ 0,00</div>
                 </div>
 
-                <!-- Caixa Titular Individual SASSEPE (Oculta se houver dependentes) -->
-                <div id="boxSassepeTitular" class="result-box" style="margin-top:0.75rem;">
+                <!-- Mensalidade SASSEPE (Dinâmico para Ind/Total) -->
+                <div class="result-box" id="boxSassepeMensalidade" style="margin-top:0.75rem;">
                     <div>
-                        <div class="label">Mensalidade Titular</div>
-                        <div style="font-size:0.75rem; color:var(--text-muted)" id="sassepeAliqTitular">Alíquota: --</div>
+                        <div class="label" id="lblSassepeMensalidade">Mensalidade SASSEPE (Titular)</div>
+                        <div style="font-size:0.75rem; color:var(--text-muted)" id="descSassepeMensalidade">Alíquota: --</div>
                     </div>
-                    <div class="value" id="resSassepeTitular">R$ 0,00</div>
+                    <div class="value" id="resSassepeMensalidade">R$ 0,00</div>
                 </div>
-
-                <!-- Card Total (Titular + Dep) SASSEPE - Visível somente quando houver dependentes -->
-                <div id="boxSassepeTotalPlano" class="result-box hidden" style="margin-top:0.75rem; background: #f3f4f6;">
-                    <div>
-                        <div class="label">Valor Total Mensal do SASSEPE</div>
-                        <div style="font-size:0.75rem; color:var(--text-muted)">Desconto Bruto em Folha (Titular + Dep.)</div>
-                    </div>
-                    <div class="value" id="resSassepeTotalPlano" style="color: var(--primary);">R$ 0,00</div>
-                </div>
-
-                <!-- Detalhamento dos Dependentes no SASSEPE (Abaixo do Total) -->
-                <div id="detalhesDepSassepe" class="detalhe-container hidden"></div>
+                <!-- Detalhamento exclusivo dos descontos do SASSEPE -->
+                <div id="detalhesSassepe" class="detalhe-container hidden"></div>
 
                 <div class="result-box highlight" style="margin-top:0.75rem;">
                     <div>
@@ -421,7 +425,9 @@
             cargoComissionado: document.getElementById('cargoComissionado'),
             idade: document.getElementById('idade'),
             valorPlano: document.getElementById('valorPlano'),
-            doencaGrave: document.getElementById('doencaGrave')
+            doencaGrave: document.getElementById('doencaGrave'),
+            aq3: document.getElementById('aq3'),
+            aq45: document.getElementById('aq45')
         };
 
         let dependenteCount = 0;
@@ -487,6 +493,17 @@
             btnToggleTabela.textContent = containerTabelaIdade.classList.contains('hidden') 
                 ? 'Ver Tabela de Faixas Etárias' 
                 : 'Ocultar Tabela de Faixas Etárias';
+        });
+
+        // Garantir que apenas um AQ possa ser selecionado por vez
+        els.aq3.addEventListener('change', (e) => {
+            if (e.target.checked) els.aq45.checked = false;
+            calcularReembolso();
+        });
+        
+        els.aq45.addEventListener('change', (e) => {
+            if (e.target.checked) els.aq3.checked = false;
+            calcularReembolso();
         });
 
         document.getElementById('btnAddDependente').addEventListener('click', () => {
@@ -577,19 +594,37 @@
         function calcularReembolso() {
             const isComissionado = toggle.checked;
             let salarioAtualizado = 0;
+            let baseSalarioSemAQ = 0;
+            let valorAQ = 0;
 
             if (isComissionado) {
                 const comissionadoRow = comissionadosData.find(c => c.s === els.cargoComissionado.value);
                 const salarioBase = comissionadoRow ? (comissionadoRow.b + comissionadoRow.r) : 0;
-                salarioAtualizado = salarioBase * FATOR_ATUALIZACAO_COMISSIONADOS;
+                baseSalarioSemAQ = salarioBase * FATOR_ATUALIZACAO_COMISSIONADOS;
+                salarioAtualizado = baseSalarioSemAQ;
             } else {
                 const efetivoRow = tabelaSalarial.find(s => s.p === els.padrao.value);
                 const salarioBase = efetivoRow ? efetivoRow[els.cargo.value] : 0;
-                salarioAtualizado = salarioBase * FATOR_ATUALIZACAO_SALARIO;
+                baseSalarioSemAQ = salarioBase * FATOR_ATUALIZACAO_SALARIO;
+
+                // Calcula o AQ
+                if (els.aq3.checked) {
+                    valorAQ = baseSalarioSemAQ * 0.03;
+                } else if (els.aq45.checked) {
+                    valorAQ = baseSalarioSemAQ * 0.045;
+                }
+
+                salarioAtualizado = baseSalarioSemAQ + valorAQ;
             }
 
             const idadeTitular = parseInt(els.idade.value) || 0;
             const depElements = document.querySelectorAll('.dependente-item');
+            
+            // Textos informativos dinâmicos com ou sem AQ
+            let textoBaseRef = `Base: ${formatBRL(baseSalarioSemAQ)}`;
+            if (valorAQ > 0) {
+                textoBaseRef += ` + AQ: ${formatBRL(valorAQ)} = Total: ${formatBRL(salarioAtualizado)}`;
+            }
 
             if (activeTab === 'padrao') {
                 let tetoRemuneracao = salarioAtualizado * 0.10;
@@ -608,31 +643,51 @@
                 let planoTotalVal = planoTitularVal;
                 let tetoIdadeTotal = tetoIdadeTitular;
 
-                // Controles de visibilidade Padrão
-                const boxTetoIdadeTitular = document.getElementById('boxTetoIdadeTitular');
-                const boxTetoIdadeTotal = document.getElementById('boxTetoIdadeTotal');
-                const containerDepPadrao = document.getElementById('detalhesDepPadrao');
+                // DOM Elements PADRÃO
+                const boxTetoIdade = document.getElementById('boxTetoIdade');
+                const lblTetoIdade = document.getElementById('lblTetoIdade');
+                const descTetoIdade = document.getElementById('descTetoIdade');
+                const resTetoIdade = document.getElementById('resTetoIdade');
+                const detalhesTetoIdadePadrao = document.getElementById('detalhesTetoIdadePadrao');
+
+                const boxPlano = document.getElementById('boxPlano');
+                const lblPlano = document.getElementById('lblPlano');
+                const descPlano = document.getElementById('descPlano');
+                const resPlano = document.getElementById('resPlano');
+                const detalhesPlanoPadrao = document.getElementById('detalhesPlanoPadrao');
                 
-                containerDepPadrao.innerHTML = '';
+                detalhesTetoIdadePadrao.innerHTML = '';
+                detalhesPlanoPadrao.innerHTML = '';
 
                 if (depElements.length > 0) {
-                    boxTetoIdadeTitular.classList.add('hidden'); // Esconde titular sozinho
-                    boxTetoIdadeTotal.classList.remove('hidden'); // Mostra a soma total
-                    containerDepPadrao.classList.remove('hidden'); // Mostra os detalhes
+                    // Configurar Teto Faixa Etária (Total)
+                    lblTetoIdade.textContent = 'Teto Faixas Etárias Total';
+                    descTetoIdade.textContent = 'Titular + Dependentes';
+                    boxTetoIdade.style.background = '#f3f4f6';
+                    detalhesTetoIdadePadrao.classList.remove('hidden');
 
-                    // Adiciona Titular na lista de detalhes primeiro
-                    let detalhesHtml = `
+                    // Configurar Valor Comprovado (Total)
+                    lblPlano.textContent = 'Valor Comprovado Total';
+                    descPlano.textContent = 'Mensalidades Titular + Dependentes';
+                    boxPlano.style.background = '#f3f4f6';
+                    detalhesPlanoPadrao.classList.remove('hidden');
+
+                    // Detalhamento Titular
+                    let tetoHtml = `
                         <div class="detalhe-item">
-                            <div>
-                                <span class="title">Titular</span> (${idadeTitular} anos - Faixa: ${linhaIdadeTitular ? linhaIdadeTitular.label : '--'})
-                            </div>
-                            <div>
-                                Teto: <strong>${formatBRL(tetoIdadeTitular)}</strong> | Plano: <strong>${formatBRL(planoTitularVal)}</strong>
-                            </div>
+                            <span><span class="title">Titular</span> (${idadeTitular} anos - Faixa: ${linhaIdadeTitular ? linhaIdadeTitular.label : '--'})</span>
+                            <strong>${formatBRL(tetoIdadeTitular)}</strong>
+                        </div>
+                    `;
+                    
+                    let planoHtml = `
+                        <div class="detalhe-item">
+                            <span><span class="title">Titular</span></span>
+                            <strong>${formatBRL(planoTitularVal)}</strong>
                         </div>
                     `;
 
-                    // Adiciona Dependentes na lista
+                    // Detalhamento Dependentes
                     depElements.forEach((depEl, idx) => {
                         const depIdade = parseInt(depEl.querySelector('.dep-idade').value) || 0;
                         const depValor = parseFloat(depEl.querySelector('.dep-valor').value) || 0;
@@ -642,29 +697,42 @@
                         planoTotalVal += depValor;
                         tetoIdadeTotal += tetoIdadeDep;
 
-                        detalhesHtml += `
+                        tetoHtml += `
                             <div class="detalhe-item">
-                                <div>
-                                    <span class="title">Dependente ${idx + 1}</span> (${depIdade} anos - Faixa: ${linhaIdadeDep ? linhaIdadeDep.label : '--'})
-                                </div>
-                                <div>
-                                    Teto: <strong>${formatBRL(tetoIdadeDep)}</strong> | Plano: <strong>${formatBRL(depValor)}</strong>
-                                </div>
+                                <span><span class="title">Dependente ${idx + 1}</span> (${depIdade} anos - Faixa: ${linhaIdadeDep ? linhaIdadeDep.label : '--'})</span>
+                                <strong>${formatBRL(tetoIdadeDep)}</strong>
+                            </div>
+                        `;
+                        
+                        planoHtml += `
+                            <div class="detalhe-item">
+                                <span><span class="title">Dependente ${idx + 1}</span></span>
+                                <strong>${formatBRL(depValor)}</strong>
                             </div>
                         `;
                     });
 
-                    containerDepPadrao.innerHTML = detalhesHtml;
+                    detalhesTetoIdadePadrao.innerHTML = tetoHtml;
+                    detalhesPlanoPadrao.innerHTML = planoHtml;
+
                 } else {
-                    boxTetoIdadeTitular.classList.remove('hidden'); // Mostra titular sozinho
-                    boxTetoIdadeTotal.classList.add('hidden'); // Esconde a caixa Total
-                    containerDepPadrao.classList.add('hidden'); // Esconde a lista
+                    // Configurar Teto Faixa Etária (Individual)
+                    lblTetoIdade.textContent = 'Teto Faixa Etária (Titular)';
+                    descTetoIdade.textContent = `Faixa: ${linhaIdadeTitular ? linhaIdadeTitular.label : "--"}`;
+                    boxTetoIdade.style.background = '#f9fafb';
+                    detalhesTetoIdadePadrao.classList.add('hidden');
+
+                    // Configurar Valor Comprovado (Individual)
+                    lblPlano.textContent = 'Valor Comprovado (Mensalidade)';
+                    descPlano.textContent = 'Apenas Titular';
+                    boxPlano.style.background = '#f9fafb';
+                    detalhesPlanoPadrao.classList.add('hidden');
                 }
 
                 const reembolso = Math.min(tetoRemuneracao, tetoIdadeTotal, planoTotalVal);
 
                 document.getElementById('resTetoSalario').textContent = formatBRL(tetoRemuneracao);
-                document.getElementById('salarioBaseRef').textContent = `Base de Cálculo Atualizada: ${formatBRL(salarioAtualizado)}`;
+                document.getElementById('salarioBaseRef').textContent = textoBaseRef;
                 
                 const alerta = document.getElementById('alertaAcrescimo');
                 if (teveAcrescimo) {
@@ -677,11 +745,8 @@
                     alerta.classList.add('hidden');
                 }
                 
-                document.getElementById('resTetoIdadeTitular').textContent = formatBRL(tetoIdadeTitular);
-                document.getElementById('faixaRefTitular').textContent = `Faixa: ${linhaIdadeTitular ? linhaIdadeTitular.label : "--"}`;
-                
-                document.getElementById('resTetoIdadeTotal').textContent = formatBRL(tetoIdadeTotal);
-                document.getElementById('resPlano').textContent = formatBRL(planoTotalVal);
+                resTetoIdade.textContent = formatBRL(tetoIdadeTotal);
+                resPlano.textContent = formatBRL(planoTotalVal);
                 document.getElementById('resFinal').textContent = formatBRL(reembolso);
 
                 const sugestao = document.getElementById('sugestaoPlano');
@@ -701,33 +766,33 @@
 
                 let valorSassepeDepTotal = 0;
 
-                // Controles de visibilidade SASSEPE
-                const boxSassepeTitular = document.getElementById('boxSassepeTitular');
-                const boxSassepeTotalPlano = document.getElementById('boxSassepeTotalPlano');
-                const containerDepSassepe = document.getElementById('detalhesDepSassepe');
+                // DOM Elements SASSEPE
+                const boxSassepeMensalidade = document.getElementById('boxSassepeMensalidade');
+                const lblSassepeMensalidade = document.getElementById('lblSassepeMensalidade');
+                const descSassepeMensalidade = document.getElementById('descSassepeMensalidade');
+                const resSassepeMensalidade = document.getElementById('resSassepeMensalidade');
+                const detalhesSassepe = document.getElementById('detalhesSassepe');
                 const sassepeDesembolsoRef = document.getElementById('sassepeDesembolsoRef');
 
-                containerDepSassepe.innerHTML = '';
+                detalhesSassepe.innerHTML = '';
 
                 if (depElements.length > 0) {
-                    boxSassepeTitular.classList.add('hidden'); // Oculta a caixa do titular sozinha
-                    boxSassepeTotalPlano.classList.remove('hidden'); // Exibe a caixa do Total Titular + Dep.
-                    containerDepSassepe.classList.remove('hidden'); // Exibe a lista detalhada
+                    lblSassepeMensalidade.textContent = 'Valor Total Mensal do SASSEPE';
+                    descSassepeMensalidade.textContent = 'Titular + Dependentes';
+                    boxSassepeMensalidade.style.background = '#f3f4f6';
+                    resSassepeMensalidade.style.color = 'var(--primary)';
+                    detalhesSassepe.classList.remove('hidden');
                     sassepeDesembolsoRef.textContent = "(Total do Plano - R$ 150,00 Reembolsados)"; 
 
-                    // Adiciona o Titular na lista detalhada
-                    let detalhesHtml = `
+                    // Detalhamento Titular (SASSEPE)
+                    let sassepeHtml = `
                         <div class="detalhe-item">
-                            <div>
-                                <span class="title">Titular</span> (${idadeTitular} anos - ${linhaTitular ? linhaTitular.label : '--'})
-                            </div>
-                            <div>
-                                Alíquota: <strong>${formatPct(aliqTitular)}</strong> | Valor: <strong>${formatBRL(valorSassepeTitular)}</strong>
-                            </div>
+                            <span><span class="title">Titular</span> (${idadeTitular} anos - Alíquota: ${formatPct(aliqTitular)})</span>
+                            <strong>${formatBRL(valorSassepeTitular)}</strong>
                         </div>
                     `;
 
-                    // Calcula e Adiciona os Dependentes na lista detalhada
+                    // Calcula e Adiciona os Dependentes na lista
                     depElements.forEach((depEl, idx) => {
                         const depIdade = parseInt(depEl.querySelector('.dep-idade').value) || 0;
                         const linhaDep = tabelaSassepeDependente.find(i => depIdade >= i.min && depIdade <= i.max);
@@ -735,24 +800,22 @@
                         const valDep = salarioAtualizado * aliqDep;
                         valorSassepeDepTotal += valDep;
 
-                        detalhesHtml += `
+                        sassepeHtml += `
                             <div class="detalhe-item">
-                                <div>
-                                    <span class="title">Dependente ${idx + 1}</span> (${depIdade} anos - ${linhaDep ? linhaDep.label : '--'})
-                                </div>
-                                <div>
-                                    Alíquota: <strong>${formatPct(aliqDep)}</strong> | Valor: <strong>${formatBRL(valDep)}</strong>
-                                </div>
+                                <span><span class="title">Dependente ${idx + 1}</span> (${depIdade} anos - Alíquota: ${formatPct(aliqDep)})</span>
+                                <strong>${formatBRL(valDep)}</strong>
                             </div>
                         `;
                     });
 
-                    containerDepSassepe.innerHTML = detalhesHtml;
+                    detalhesSassepe.innerHTML = sassepeHtml;
 
                 } else {
-                    boxSassepeTitular.classList.remove('hidden'); // Exibe a caixa do titular sozinha
-                    boxSassepeTotalPlano.classList.add('hidden'); // Oculta a caixa de soma total
-                    containerDepSassepe.classList.add('hidden'); // Oculta a lista detalhada
+                    lblSassepeMensalidade.textContent = 'Mensalidade SASSEPE (Titular)';
+                    descSassepeMensalidade.textContent = `Alíquota: ${formatPct(aliqTitular)}`;
+                    boxSassepeMensalidade.style.background = '#f9fafb';
+                    resSassepeMensalidade.style.color = 'var(--text-main)';
+                    detalhesSassepe.classList.add('hidden');
                     sassepeDesembolsoRef.textContent = "(Titular - R$ 150,00 Reembolsados)";
                 }
 
@@ -761,11 +824,9 @@
                 const desembolsoEfetivo = Math.max(0, totalPlanoSassepe - reembolsoFixo);
 
                 document.getElementById('resSassepeSalario').textContent = formatBRL(salarioAtualizado);
+                document.getElementById('sassepeSalarioRef').textContent = textoBaseRef;
                 
-                document.getElementById('resSassepeTitular').textContent = formatBRL(valorSassepeTitular);
-                document.getElementById('sassepeAliqTitular').textContent = `Faixa: ${linhaTitular ? linhaTitular.label : "--"} | Alíquota: ${formatPct(aliqTitular)}`;
-
-                document.getElementById('resSassepeTotalPlano').textContent = formatBRL(totalPlanoSassepe);
+                resSassepeMensalidade.textContent = formatBRL(totalPlanoSassepe);
                 document.getElementById('resSassepeReembolso').textContent = formatBRL(reembolsoFixo);
                 document.getElementById('resSassepeDesembolso').textContent = formatBRL(desembolsoEfetivo);
             }
