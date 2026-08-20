@@ -140,7 +140,10 @@
         .lista-linhas { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
         .linha-cargo-box { background: var(--card-bg); padding: 12px; border: 1px solid var(--border-color); border-radius: 12px; display: flex; flex-direction: column; gap: 10px; position: relative; }
         .linha-cargo-box:focus-within { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-alpha); z-index: 100; }
+        
         .linha-top { display: grid; grid-template-columns: 60px 1fr 32px; gap: 8px; align-items: center; }
+        .linha-top-manual { grid-template-columns: 60px 1fr 100px 32px; } /* Grid específica para inputs manuais */
+
         input[type="number"], input.busca-input { padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; width: 100%; height: 38px; color: var(--text-main); background-color: var(--panel-bg); font-family: inherit; box-sizing: border-box; }
         input.busca-input { text-overflow: ellipsis; white-space: nowrap; overflow: hidden; cursor: text; }
         input[type="number"] { font-weight: 600; text-align: center; padding: 8px 4px; }
@@ -155,6 +158,9 @@
         .btn-remover-linha:hover { background: #fee2e2; color: var(--danger); }
         .btn-adicionar { background: transparent; color: var(--text-muted); border: 2px dashed var(--border-color); border-radius: 8px; padding: 10px; cursor: pointer; font-weight: 600; font-size: 12px; display: flex; align-items: center; justify-content: center; gap: 6px; transition: 0.2s; width: 100%; }
         .btn-adicionar:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+        
+        .btn-adicionar-manual { background: transparent; color: var(--text-muted); border: 1px dashed var(--border-color); border-radius: 8px; padding: 6px; cursor: pointer; font-weight: 500; font-size: 11px; display: flex; align-items: center; justify-content: center; gap: 4px; transition: 0.2s; width: 100%; margin-top: 8px; }
+        .btn-adicionar-manual:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
 
         .toggle-switch-container { position: relative; display: inline-flex; background: var(--border-color); border-radius: 99px; padding: 2px; width: 110px; height: 26px; align-items: center; cursor: pointer; user-select: none; }
         .toggle-slider { position: absolute; top: 2px; left: 2px; width: 52px; height: calc(100% - 4px); background: var(--card-bg); border-radius: 99px; transition: transform 0.25s; z-index: 1; box-shadow: var(--shadow-sm); }
@@ -292,12 +298,14 @@
                 <h2><span style="color: var(--danger);">❑</span> 1. O QUE SAI (EXTINGUIR)</h2>
                 <div class="lista-linhas" id="container-origem"></div>
                 <button class="btn-adicionar" onclick="adicionarLinha('origem', true)">+ Adicionar Cargo/Função</button>
+                <button class="btn-adicionar-manual" onclick="adicionarLinhaManual('origem', true)">+ Criar Personalizado (Nome e Valor)</button>
             </div>
 
             <div class="painel painel-destino">
                 <h2><span style="color: var(--success);">+</span> 2. O QUE ENTRA (CRIAR)</h2>
                 <div class="lista-linhas" id="container-destino"></div>
                 <button class="btn-adicionar" onclick="adicionarLinha('destino', true)">+ Adicionar Cargo/Função</button>
+                <button class="btn-adicionar-manual" onclick="adicionarLinhaManual('destino', true)">+ Criar Personalizado (Nome e Valor)</button>
             </div>
         </div>
 
@@ -510,7 +518,7 @@ const funcoesGratificadasData = [
     {n: "CHEFE DE DIVISÃO", s: "FGJ-1", v: 2102.28},
     {n: "CHEFE DE NÚCLEO", s: "FGJ-1", v: 2102.28},
     {n: "CHEFE DE NÚCLEO DA CONTADORIA REMOTA DE 1º GRAU", s: "FCNCRCPR", v: 7994.07},
-    {n: "CHEFE DE NÚCLEO DA CENTRAL DE ATENDIMENTO PROCESSUAL DO 1º GRAU", s: "FCNCAP", v: 3241.82, a: true}, // MARCA DE NAO APLICAR FATOR
+    {n: "CHEFE DE NÚCLEO DA CENTRAL DE ATENDIMENTO PROCESSUAL DO 1º GRAU", s: "FCNCAP", v: 3241.82, a: true},
     {n: "CHEFE DE NÚCLEO DE APOIO ADMINISTRATIVO", s: "FCNAACPR", v: 3997.02},
     {n: "CHEFE DE NÚCLEO DE BIBLIOTECA", s: "FGJ-1", v: 2102.28},
     {n: "CHEFE DE NÚCLEO DE DIRETORIA REMOTA", s: "FCNDR", v: 3534.76},
@@ -530,9 +538,9 @@ const funcoesGratificadasData = [
     {n: "COMISSÃO PERMANENTE DE LICITAÇÃO (CPL)", s: "CPL", v: 3142.11},
     {n: "CONCILIADOR CEJUSC", s: "FGCNSC", v: 1944.39},
     {n: "CONCILIADOR JUIZADO", s: "FGCJ-1", v: 1944.39},
-    {n: "COORDENADOR DA CENTRAL DE ATENDIMENTO PROCESSUAL DO 1º GRAU", s: "FCCAP", v: 8417.76, a: true}, // MARCA DE NAO APLICAR FATOR
+    {n: "COORDENADOR DA CENTRAL DE ATENDIMENTO PROCESSUAL DO 1º GRAU", s: "FCCAP", v: 8417.76, a: true},
     {n: "COORDENADOR DA CONTADORIA REMOTA", s: "FCCRCPR", v: 7994.07},
-    {n: "COORDENADOR DE PROCESSAMENTO REMOTO", s: "FGCNPR", v: 5328.36, a: true}, // MARCA DE NAO APLICAR FATOR
+    {n: "COORDENADOR DE PROCESSAMENTO REMOTO", s: "FGCNPR", v: 5328.36, a: true},
     {n: "COORDENADOR DE UNIDADE", s: "FGJ-2", v: 1501.62},
     {n: "COORDENADOR DO NÚCLEO DE REVISÃO E CERTIFICAÇÃO REMOTA", s: "FCNRCR", v: 3997.02},
     {n: "COORDENADORIA DE PRECATÓRIOS", s: "PREC", v: 3997.02},
@@ -547,11 +555,11 @@ const funcoesGratificadasData = [
     {n: "FUNÇÃO DE ASSESSORAMENTO TÉCNICO", s: "FAT", v: 2102.28},
     {n: "FUNÇÃO DE SECR. JUDICIÁRIA", s: "FSJ-1", v: 1201.24},
     {n: "FUNÇÃO DE SECRETARIADO JUDICIÁRIA", s: "FSJ-1", v: 1201.24},
-    {n: "FUNÇÃO GERENCIAL JUDICIÁRIA (FGJ-1)", s: "FGJ-1", v: 2213.70, a: true}, // MARCA DE NAO APLICAR FATOR
+    {n: "FUNÇÃO GERENCIAL JUDICIÁRIA (FGJ-1)", s: "FGJ-1", v: 2213.70, a: true},
     {n: "FUNÇÃO GERENCIAL JUDICIÁRIA (FGJ-2)", s: "FGJ-2", v: 1501.62},
     {n: "FUNÇÃO GERENCIAL JUDICIÁRIA (FGJ-3)", s: "FGJ-3", v: 1051.13},
     {n: "FUNCAO GERENCIAL SECR DE SESSAO - FGSS", s: "FGSS", v: 2474.00},
-    {n: "GERENTE", s: "FGJ-1", v: 2213.70, a: true}, // MARCA DE NAO APLICAR FATOR
+    {n: "GERENTE", s: "FGJ-1", v: 2213.70, a: true},
     {n: "GERENTE DA DIRETORIA DE GESTÃO FINANCEIRA DE MAGISTRADOS", s: "FGGUE2", v: 1441.36},
     {n: "GERENTE DA DIRETORIA DE GESTÃO FUNCIONAL", s: "FGGUE1", v: 3997.02},
     {n: "GERENTE DE NÚCLEO DA CONTADORIA REMOTA DE 1º GRAU", s: "FGJ-1", v: 2102.28},
@@ -565,23 +573,23 @@ const funcoesGratificadasData = [
     {n: "GESTOR DE PROJETO ESTRATÉGICO III", s: "FGGPE-3", v: 2102.28},
     {n: "GESTOR DE UNIDADE ESPECIAL 1", s: "FGGUE1", v: 3997.02},
     {n: "GESTOR DE UNIDADE ESPECIAL 2", s: "FGGUE2", v: 1441.36},
-    {n: "GESTOR DE UNIDADE ESPECIAL DA CENTRAL JUDICIÁRIA DE PROCESSAMENTO REMOTO", s: "FGGUEC", v: 4208.86, a: true}, // MARCA DE NAO APLICAR FATOR
+    {n: "GESTOR DE UNIDADE ESPECIAL DA CENTRAL JUDICIÁRIA DE PROCESSAMENTO REMOTO", s: "FGGUEC", v: 4208.86, a: true},
     {n: "LÍDER DE EQUIPE", s: "FLJ-1", v: 1201.24},
     {n: "LÍDER TÉCNICO", s: "FGJ-2", v: 1501.62},
     {n: "MEMBRO DE NÚCLEO DO NUGEPNAC/FGMN-1", s: "FGMN-1", v: 1861.50},
     {n: "REPRESENTAÇÃO DE GABINETE", s: "RG", v: 2462.90},
     {n: "SECRETARIADO E APOIO ADMIN(CENJUD)/FSJ-1", s: "FSJ-1", v: 1201.24},
     {n: "SECRETARIADO E APOIO ADMINISTRATIVO (FAJ-3)", s: "FAJ-3", v: 450.47},
-    {n: "SECRETARIADO E APOIO ADMINISTRATIVO (FSJ-1)", s: "FSJ-1", v: 1264.90, a: true}, // MARCA DE NAO APLICAR FATOR
+    {n: "SECRETARIADO E APOIO ADMINISTRATIVO (FSJ-1)", s: "FSJ-1", v: 1264.90, a: true},
     {n: "SECRETÁRIO DE CENTRAL DE PROCESSAMENTO REMOTO DE 1º GRAU", s: "FSCPR", v: 10795.26},
     {n: "SECRETÁRIO EXECUTIVO DE CENTRAL DE PROCESSAMENTO REMOTO DE 1º GRAU", s: "FSECPR", v: 10120.47},
     {n: "SECRETÁRIO GERAL COGESI/ FGJ-1", s: "FGJ-1", v: 2102.28},
-    {n: "SUPERVISOR DE ATENDIMENTO DA CENTRAL DE ATENDIMENTO PROCESSUAL DO 1º GRAU", s: "FSACAP", v: 4208.86, a: true}, // MARCA DE NAO APLICAR FATOR
-    {n: "SUPERVISOR DE PROCESSAMENTO REMOTO", s: "FGSPR", v: 4208.86, a: true}, // MARCA DE NAO APLICAR FATOR
+    {n: "SUPERVISOR DE ATENDIMENTO DA CENTRAL DE ATENDIMENTO PROCESSUAL DO 1º GRAU", s: "FSACAP", v: 4208.86, a: true},
+    {n: "SUPERVISOR DE PROCESSAMENTO REMOTO", s: "FGSPR", v: 4208.86, a: true},
     {n: "SUPERVISOR TÉCNICO DA CONTADORIA REMOTA", s: "FSTCR", v: 3997.02},
     {n: "SUPERVISOR TÉCNICO DA DIRETORIA GERAL", s: "FGSTDG", v: 3997.02},
     {n: "SUPERVISOR TÉCNICO DE TIC", s: "FGGUE-1", v: 3997.02},
-    {n: "SUPERVISOR DO NÚCLEO DE REVISORES E CERTIFICADORES", s: "FGSNRC", v: 4208.86, a: true} // MARCA DE NAO APLICAR FATOR
+    {n: "SUPERVISOR DO NÚCLEO DE REVISORES E CERTIFICADORES", s: "FGSNRC", v: 4208.86, a: true}
 ];
 
 function formatarMoeda(valor) { return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
@@ -640,6 +648,38 @@ function adicionarLinha(tipo, focus = false) {
     container.appendChild(box);
     calcularSandbox();
     if(focus) { const input = box.querySelector('.busca-input'); if(input) input.focus(); }
+}
+
+function adicionarLinhaManual(tipo, focus = false) {
+    const container = document.getElementById(`container-${tipo}`);
+    const box = document.createElement('div');
+    box.className = 'linha-cargo-box';
+
+    box.innerHTML = `
+        <div class="linha-top linha-top-manual">
+            <input type="number" class="calibri-values" value="1" min="1" oninput="atualizarBreakdownManual(this); calcularSandbox()">
+            <input type="text" class="busca-input nome-manual" placeholder="Nome personalizado..." data-tipo="manual" oninput="calcularSandbox()">
+            <input type="number" step="0.01" class="valor-manual calibri-values" placeholder="Valor unit. R$" oninput="atualizarBreakdownManual(this); calcularSandbox()">
+            <button class="btn-remover-linha" onclick="removerLinha(this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+        </div>
+        <div class="detalhes-comissionado" style="display: flex; padding-top: 10px; border-top: 1px dashed var(--border-color); justify-content: flex-end; align-items: center;">
+            <div class="valores-breakdown" style="font-size: 12px; text-align: right; color: var(--text-muted); display: flex; align-items: center; gap: 8px; width: 100%;">
+                <span style="background: var(--warning); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; margin-right: auto;">PERSONALIZADO</span>
+                <span style="font-size: 15px; color: var(--text-main);">Total: <span class="v-total" style="font-weight: 700;">R$ 0,00</span></span>
+            </div>
+        </div>
+    `;
+    container.appendChild(box);
+    calcularSandbox();
+    if(focus) { const input = box.querySelector('.nome-manual'); if(input) input.focus(); }
+}
+
+function atualizarBreakdownManual(element) {
+    const box = element.closest('.linha-cargo-box');
+    const val = parseFloat(box.querySelector('.valor-manual').value) || 0;
+    const qtd = parseInt(box.querySelector('input[type="number"]').value) || 0;
+    const totalSpan = box.querySelector('.v-total');
+    totalSpan.innerText = formatarMoeda(val * qtd);
 }
 
 function removerLinha(botao) {
@@ -722,7 +762,6 @@ function renderDropdown(listaElement, termo) {
     } else {
         funcoesGratificadasData.forEach(f => {
             if (f.s.toLowerCase().includes(busca) || f.n.toLowerCase().includes(busca) || busca === "") {
-                // Passa o atributo "data-atualizado" pro HTML de sugestões
                 const atualizadoStatus = f.a ? 'true' : 'false';
                 html += `<div class="sugestao-item" data-codigo="${f.s}" data-valor="${f.v}" data-atualizado="${atualizadoStatus}" data-tipo="funcao" data-label="[${f.s}] ${f.n}" onclick="selecionarOpcao(this)"><span style="font-weight: 600;">${f.s}</span> - <span style="color: var(--text-muted);">${f.n}</span></div>`;
             }
@@ -766,7 +805,7 @@ function selecionarOpcao(itemElement) {
         atualizarBreakdownLinha(box);
     } else {
         input.setAttribute('data-valor', itemElement.getAttribute('data-valor'));
-        input.setAttribute('data-atualizado', itemElement.getAttribute('data-atualizado')); // Copia o status
+        input.setAttribute('data-atualizado', itemElement.getAttribute('data-atualizado')); 
         box.querySelector('.toggle-switch-container').style.display = 'none';
         box.querySelectorAll('.wrap-base-rep').forEach(el => el.style.display = 'none');
         detalhesDiv.style.display = 'flex';
@@ -780,20 +819,22 @@ function extrairInfoLinha(box) {
     const input = box.querySelector('.busca-input');
     const nome = input.value;
     const vinculo = box.getAttribute('data-vinculo') || 'puro';
+    const tipo = input.getAttribute('data-tipo');
     let val = 0;
     
-    // Matemática direta sem nenhum Math.round ou fix interno na memória
-    if (input.getAttribute('data-tipo') === 'comissionado') {
+    if (tipo === 'comissionado') {
         const base = parseFloat(input.getAttribute('data-base')) || 0;
         const rep = parseFloat(input.getAttribute('data-rep')) || 0;
         val = (vinculo === 'puro' ? base + rep : rep) * FATOR_ATUALIZACAO;
-    } else if (input.getAttribute('data-tipo') === 'funcao') {
+    } else if (tipo === 'funcao') {
         const isAtualizado = input.getAttribute('data-atualizado') === 'true';
         const fator = isAtualizado ? 1 : FATOR_ATUALIZACAO;
         val = (parseFloat(input.getAttribute('data-valor')) || 0) * fator;
+    } else if (tipo === 'manual') {
+        val = parseFloat(box.querySelector('.valor-manual').value) || 0;
     }
     
-    return { qtd, nome, vinculo, valor: val, total: qtd * val, valido: val > 0 && nome !== "" };
+    return { qtd, nome, vinculo, valor: val, total: qtd * val, valido: val > 0 && nome !== "", tipo: tipo };
 }
 
 /* ==========================================
@@ -869,7 +910,13 @@ function salvarCenario() {
         if (info.valido) {
             if (isOrigem) creditos += info.total; else custos += info.total;
             
-            let vText = modoAtualGlobal === 'comissionado' ? (info.vinculo === 'puro' ? '(Puro)' : '(Efetivo)') : '';
+            let vText = '';
+            if (info.tipo === 'comissionado') {
+                vText = info.vinculo === 'puro' ? '(Puro)' : '(Efetivo)';
+            } else if (info.tipo === 'manual') {
+                vText = '<span style="color:var(--warning); font-weight:700;">[Personalizado]</span>';
+            }
+
             let valUnit = formatarMoeda(info.valor);
             let valMes = formatarMoeda(info.total);
             let valAno = formatarMoeda(info.total * 12);
