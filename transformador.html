@@ -114,9 +114,8 @@
         .cd-col.sai h4 { color: var(--danger); }
         .cd-col.entra h4 { color: var(--success); }
         
-        .cd-col ul { margin: 0; padding: 0 0 0 16px; list-style-type: square; color: var(--text-main); font-size: 14px; line-height: 1.6; }
+        .cd-col ul { margin: 0; padding: 0 0 0 4px; list-style-type: none; color: var(--text-main); font-size: 14px; line-height: 1.6; }
         .cd-col li { margin-bottom: 12px; }
-        .cd-col li strong { font-size: 15px; }
 
         .cd-footer { padding: 24px 30px; display: flex; justify-content: space-between; align-items: center; border-top: 2px dashed var(--border-color); }
         .cd-footer.viavel { background: rgba(5, 150, 105, 0.05); }
@@ -186,41 +185,29 @@
                 box-sizing: border-box !important; 
             }
             
-            /* A4 EM PAISAGEM (LANDSCAPE) */
             @page { margin: 10mm; size: A4 landscape; }
 
-            /* Zera o body pra evitar influências, mas libera o tamanho completo */
             html, body { overflow: visible !important; height: auto !important; width: auto !important; margin: 0 !important; padding: 0 !important; background: white !important; }
 
-            /* Esconde toda a UI do sistema web */
             .app-header, .modo-seletor-wrapper, .sandbox-container, footer, #toast, .empty-state, .scenarios-header-wrapper {
                 display: none !important;
             }
 
-            /* Esconde cenários que não são o alvo (se não for "Exportar Todos") */
             body.is-printing .cenario-dashboard:not(.print-target) { display: none !important; }
 
-            /* Remove flex do wrapper para que a quebra nativa de página funcione 100% */
             .scenarios-wrapper { 
                 display: block !important; margin: 0 !important; padding: 0 !important; width: auto !important; max-width: none !important; 
             }
 
-            /* ----------------------------------------------------
-               O SEGREDO DE UMA BOA IMPRESSÃO: O CARTÃO EM SI
-               Adicionamos PADDING aqui para criar margens invioláveis,
-               mesmo se o usuário definir "Margem: Nenhuma" no Chrome.
-            ---------------------------------------------------- */
             .cenario-dashboard.print-target, body.is-printing-all .cenario-dashboard {
                 display: block !important; box-shadow: none !important; border: none !important; 
-                margin: 0 !important; padding: 15mm 10mm !important; /* Margem de segurança cravada no card */
+                margin: 0 !important; padding: 15mm 10mm !important; 
                 width: auto !important; max-width: none !important;
                 page-break-inside: avoid;
             }
 
-            /* Esconde botões e extras do PDF */
             .cd-actions, .cd-title-group h3 span { display: none !important; }
 
-            /* CABEÇALHO INSTITUCIONAL */
             .pdf-header-doc { 
                 display: flex !important; justify-content: space-between !important; align-items: center !important;
                 border-bottom: 2px solid var(--primary) !important; padding-bottom: 10px !important; margin-bottom: 20px !important; 
@@ -229,7 +216,6 @@
             .pdf-header-doc img { height: 35px !important; margin: 0 !important; }
             .pdf-header-doc p { font-size: 14pt !important; font-weight: 800 !important; color: var(--primary) !important; text-transform: uppercase; margin: 0 !important;}
 
-            /* TÍTULO DO CENÁRIO */
             .cd-header { 
                 background: transparent !important; padding: 0 0 10px 0 !important; border-bottom: 1px solid var(--border-color) !important; 
                 text-align: left !important; display: flex !important; justify-content: space-between !important; align-items: flex-end !important; 
@@ -238,7 +224,6 @@
             .cd-title-group h3 { font-size: 18pt !important; border: none !important; padding: 0 !important; margin: 0 0 4px 0 !important; color: var(--primary-dark) !important;}
             .cd-title-group p { font-size: 11pt !important; margin: 0 !important;}
             
-            /* COLUNAS (LADO A LADO) */
             .cd-body { 
                 display: flex !important; gap: 20px !important; align-items: stretch !important; padding: 0 !important; margin-bottom: 20px !important; width: auto !important; 
             }
@@ -253,17 +238,14 @@
             .cd-col.sai h4 { border-color: #fca5a5 !important; }
             .cd-col.entra h4 { border-color: #86efac !important; }
 
-            .cd-col ul { padding-left: 20px !important; margin: 0 !important; }
+            .cd-col ul { padding-left: 0px !important; margin: 0 !important; }
             .cd-col li { page-break-inside: avoid; margin-bottom: 10px !important; font-size: 11pt !important; line-height: 1.4 !important; } 
-            .cd-col li strong { font-size: 12pt !important; }
-            .cd-col li div { font-size: 10pt !important; margin-top: 4px !important; }
             
-            /* RODAPÉ IMPACTO FINANCEIRO - Largura Corrigida */
             .cd-footer { 
                 display: flex !important; justify-content: space-between !important; align-items: center !important;
                 border-radius: 12px !important; padding: 20px 30px !important; margin-top: 0 !important; page-break-inside: avoid; flex-direction: row !important;
                 border: 4px solid var(--border-color) !important; background-color: var(--panel-bg) !important; 
-                width: auto !important; /* CORREÇÃO AQUI para evitar vazamento lateral */
+                width: auto !important; 
             }
             .cd-footer.viavel { border-color: var(--success) !important; }
             .cd-footer.inviavel { border-color: var(--danger) !important; }
@@ -343,7 +325,6 @@
     </div>
 
     <!-- ÁREA DE APRESENTAÇÃO (CENÁRIOS SALVOS) -->
-    
     <div class="scenarios-header-wrapper" id="scenarios-header" style="display: none;">
         <h2>Painel de Cenários</h2>
         <button class="btn-exportar-todos" onclick="exportarTodosNativo()">
@@ -529,6 +510,7 @@ const funcoesGratificadasData = [
     {n: "CHEFE DE DIVISÃO", s: "FGJ-1", v: 2102.28},
     {n: "CHEFE DE NÚCLEO", s: "FGJ-1", v: 2102.28},
     {n: "CHEFE DE NÚCLEO DA CONTADORIA REMOTA DE 1º GRAU", s: "FCNCRCPR", v: 7994.07},
+    {n: "CHEFE DE NÚCLEO DA CENTRAL DE ATENDIMENTO PROCESSUAL DO 1º GRAU", s: "FCNCAP", v: 3241.82, a: true}, // MARCA DE NAO APLICAR FATOR
     {n: "CHEFE DE NÚCLEO DE APOIO ADMINISTRATIVO", s: "FCNAACPR", v: 3997.02},
     {n: "CHEFE DE NÚCLEO DE BIBLIOTECA", s: "FGJ-1", v: 2102.28},
     {n: "CHEFE DE NÚCLEO DE DIRETORIA REMOTA", s: "FCNDR", v: 3534.76},
@@ -548,8 +530,9 @@ const funcoesGratificadasData = [
     {n: "COMISSÃO PERMANENTE DE LICITAÇÃO (CPL)", s: "CPL", v: 3142.11},
     {n: "CONCILIADOR CEJUSC", s: "FGCNSC", v: 1944.39},
     {n: "CONCILIADOR JUIZADO", s: "FGCJ-1", v: 1944.39},
+    {n: "COORDENADOR DA CENTRAL DE ATENDIMENTO PROCESSUAL DO 1º GRAU", s: "FCCAP", v: 8417.76, a: true}, // MARCA DE NAO APLICAR FATOR
     {n: "COORDENADOR DA CONTADORIA REMOTA", s: "FCCRCPR", v: 7994.07},
-    {n: "COORDENADOR DE PROCESSAMENTO REMOTO", s: "FCPRCPR", v: 3997.02},
+    {n: "COORDENADOR DE PROCESSAMENTO REMOTO", s: "FGCNPR", v: 5328.36, a: true}, // MARCA DE NAO APLICAR FATOR
     {n: "COORDENADOR DE UNIDADE", s: "FGJ-2", v: 1501.62},
     {n: "COORDENADOR DO NÚCLEO DE REVISÃO E CERTIFICAÇÃO REMOTA", s: "FCNRCR", v: 3997.02},
     {n: "COORDENADORIA DE PRECATÓRIOS", s: "PREC", v: 3997.02},
@@ -564,11 +547,11 @@ const funcoesGratificadasData = [
     {n: "FUNÇÃO DE ASSESSORAMENTO TÉCNICO", s: "FAT", v: 2102.28},
     {n: "FUNÇÃO DE SECR. JUDICIÁRIA", s: "FSJ-1", v: 1201.24},
     {n: "FUNÇÃO DE SECRETARIADO JUDICIÁRIA", s: "FSJ-1", v: 1201.24},
-    {n: "FUNÇÃO GERENCIAL JUDICIÁRIA (FGJ-1)", s: "FGJ-1", v: 2102.28},
+    {n: "FUNÇÃO GERENCIAL JUDICIÁRIA (FGJ-1)", s: "FGJ-1", v: 2213.70, a: true}, // MARCA DE NAO APLICAR FATOR
     {n: "FUNÇÃO GERENCIAL JUDICIÁRIA (FGJ-2)", s: "FGJ-2", v: 1501.62},
     {n: "FUNÇÃO GERENCIAL JUDICIÁRIA (FGJ-3)", s: "FGJ-3", v: 1051.13},
     {n: "FUNCAO GERENCIAL SECR DE SESSAO - FGSS", s: "FGSS", v: 2474.00},
-    {n: "GERENTE", s: "FGJ-1", v: 2102.28},
+    {n: "GERENTE", s: "FGJ-1", v: 2213.70, a: true}, // MARCA DE NAO APLICAR FATOR
     {n: "GERENTE DA DIRETORIA DE GESTÃO FINANCEIRA DE MAGISTRADOS", s: "FGGUE2", v: 1441.36},
     {n: "GERENTE DA DIRETORIA DE GESTÃO FUNCIONAL", s: "FGGUE1", v: 3997.02},
     {n: "GERENTE DE NÚCLEO DA CONTADORIA REMOTA DE 1º GRAU", s: "FGJ-1", v: 2102.28},
@@ -582,21 +565,23 @@ const funcoesGratificadasData = [
     {n: "GESTOR DE PROJETO ESTRATÉGICO III", s: "FGGPE-3", v: 2102.28},
     {n: "GESTOR DE UNIDADE ESPECIAL 1", s: "FGGUE1", v: 3997.02},
     {n: "GESTOR DE UNIDADE ESPECIAL 2", s: "FGGUE2", v: 1441.36},
+    {n: "GESTOR DE UNIDADE ESPECIAL DA CENTRAL JUDICIÁRIA DE PROCESSAMENTO REMOTO", s: "FGGUEC", v: 4208.86, a: true}, // MARCA DE NAO APLICAR FATOR
     {n: "LÍDER DE EQUIPE", s: "FLJ-1", v: 1201.24},
     {n: "LÍDER TÉCNICO", s: "FGJ-2", v: 1501.62},
     {n: "MEMBRO DE NÚCLEO DO NUGEPNAC/FGMN-1", s: "FGMN-1", v: 1861.50},
     {n: "REPRESENTAÇÃO DE GABINETE", s: "RG", v: 2462.90},
     {n: "SECRETARIADO E APOIO ADMIN(CENJUD)/FSJ-1", s: "FSJ-1", v: 1201.24},
     {n: "SECRETARIADO E APOIO ADMINISTRATIVO (FAJ-3)", s: "FAJ-3", v: 450.47},
-    {n: "SECRETARIADO E APOIO ADMINISTRATIVO (FSJ-1)", s: "FSJ-1", v: 1201.24},
+    {n: "SECRETARIADO E APOIO ADMINISTRATIVO (FSJ-1)", s: "FSJ-1", v: 1264.90, a: true}, // MARCA DE NAO APLICAR FATOR
     {n: "SECRETÁRIO DE CENTRAL DE PROCESSAMENTO REMOTO DE 1º GRAU", s: "FSCPR", v: 10795.26},
     {n: "SECRETÁRIO EXECUTIVO DE CENTRAL DE PROCESSAMENTO REMOTO DE 1º GRAU", s: "FSECPR", v: 10120.47},
     {n: "SECRETÁRIO GERAL COGESI/ FGJ-1", s: "FGJ-1", v: 2102.28},
-    {n: "SUPERVISOR DE PROCESSAMENTO REMOTO", s: "FGSPR", v: 3997.02},
+    {n: "SUPERVISOR DE ATENDIMENTO DA CENTRAL DE ATENDIMENTO PROCESSUAL DO 1º GRAU", s: "FSACAP", v: 4208.86, a: true}, // MARCA DE NAO APLICAR FATOR
+    {n: "SUPERVISOR DE PROCESSAMENTO REMOTO", s: "FGSPR", v: 4208.86, a: true}, // MARCA DE NAO APLICAR FATOR
     {n: "SUPERVISOR TÉCNICO DA CONTADORIA REMOTA", s: "FSTCR", v: 3997.02},
     {n: "SUPERVISOR TÉCNICO DA DIRETORIA GERAL", s: "FGSTDG", v: 3997.02},
     {n: "SUPERVISOR TÉCNICO DE TIC", s: "FGGUE-1", v: 3997.02},
-    {n: "SUPERVISOR TÉCNICO DO NÚCLEO DE REVISÃO E CERTIFICAÇÃO REMOTA", s: "FGSNRC", v: 3997.02}
+    {n: "SUPERVISOR DO NÚCLEO DE REVISORES E CERTIFICADORES", s: "FGSNRC", v: 4208.86, a: true} // MARCA DE NAO APLICAR FATOR
 ];
 
 function formatarMoeda(valor) { return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
@@ -688,18 +673,21 @@ function atualizarBreakdownLinha(box) {
         
         baseSpan.innerText = formatarMoeda(baseVal * FATOR_ATUALIZACAO);
         repSpan.innerText = formatarMoeda(repVal * FATOR_ATUALIZACAO);
-        totalSpan.innerText = formatarMoeda((baseVal + repVal) * FATOR_ATUALIZACAO);
+        totalSpan.innerText = formatarMoeda((vinculo === 'puro' ? baseVal + repVal : repVal) * FATOR_ATUALIZACAO);
         
         if (vinculo === 'puro') {
             baseSpan.style.textDecoration = 'none'; baseSpan.style.opacity = '1';
             totalSpan.style.textDecoration = 'none'; totalSpan.style.opacity = '1'; totalSpan.style.color = 'var(--text-main)';
         } else {
             baseSpan.style.textDecoration = 'line-through'; baseSpan.style.opacity = '0.5';
-            totalSpan.style.textDecoration = 'line-through'; totalSpan.style.opacity = '0.5'; totalSpan.style.color = 'var(--text-muted)';
+            totalSpan.style.textDecoration = 'none'; totalSpan.style.opacity = '1'; totalSpan.style.color = 'var(--text-main)';
         }
     } else if (tipo === 'funcao') {
         const val = parseFloat(input.getAttribute('data-valor')) || 0;
-        totalSpan.innerText = formatarMoeda(val * FATOR_ATUALIZACAO);
+        const isAtualizado = input.getAttribute('data-atualizado') === 'true';
+        const fator = isAtualizado ? 1 : FATOR_ATUALIZACAO;
+
+        totalSpan.innerText = formatarMoeda(val * fator);
         totalSpan.style.textDecoration = 'none'; 
         totalSpan.style.opacity = '1'; 
         totalSpan.style.color = 'var(--text-main)';
@@ -734,7 +722,9 @@ function renderDropdown(listaElement, termo) {
     } else {
         funcoesGratificadasData.forEach(f => {
             if (f.s.toLowerCase().includes(busca) || f.n.toLowerCase().includes(busca) || busca === "") {
-                html += `<div class="sugestao-item" data-codigo="${f.s}" data-valor="${f.v}" data-tipo="funcao" data-label="[${f.s}] ${f.n}" onclick="selecionarOpcao(this)"><span style="font-weight: 600;">${f.s}</span> - <span style="color: var(--text-muted);">${f.n}</span></div>`;
+                // Passa o atributo "data-atualizado" pro HTML de sugestões
+                const atualizadoStatus = f.a ? 'true' : 'false';
+                html += `<div class="sugestao-item" data-codigo="${f.s}" data-valor="${f.v}" data-atualizado="${atualizadoStatus}" data-tipo="funcao" data-label="[${f.s}] ${f.n}" onclick="selecionarOpcao(this)"><span style="font-weight: 600;">${f.s}</span> - <span style="color: var(--text-muted);">${f.n}</span></div>`;
             }
         });
     }
@@ -776,6 +766,7 @@ function selecionarOpcao(itemElement) {
         atualizarBreakdownLinha(box);
     } else {
         input.setAttribute('data-valor', itemElement.getAttribute('data-valor'));
+        input.setAttribute('data-atualizado', itemElement.getAttribute('data-atualizado')); // Copia o status
         box.querySelector('.toggle-switch-container').style.display = 'none';
         box.querySelectorAll('.wrap-base-rep').forEach(el => el.style.display = 'none');
         detalhesDiv.style.display = 'flex';
@@ -791,13 +782,17 @@ function extrairInfoLinha(box) {
     const vinculo = box.getAttribute('data-vinculo') || 'puro';
     let val = 0;
     
+    // Matemática direta sem nenhum Math.round ou fix interno na memória
     if (input.getAttribute('data-tipo') === 'comissionado') {
         const base = parseFloat(input.getAttribute('data-base')) || 0;
         const rep = parseFloat(input.getAttribute('data-rep')) || 0;
         val = (vinculo === 'puro' ? base + rep : rep) * FATOR_ATUALIZACAO;
     } else if (input.getAttribute('data-tipo') === 'funcao') {
-        val = (parseFloat(input.getAttribute('data-valor')) || 0) * FATOR_ATUALIZACAO;
+        const isAtualizado = input.getAttribute('data-atualizado') === 'true';
+        const fator = isAtualizado ? 1 : FATOR_ATUALIZACAO;
+        val = (parseFloat(input.getAttribute('data-valor')) || 0) * fator;
     }
+    
     return { qtd, nome, vinculo, valor: val, total: qtd * val, valido: val > 0 && nome !== "" };
 }
 
@@ -869,47 +864,40 @@ function salvarCenario() {
     let creditos = 0; let custos = 0;
     let descOrigem = []; let descDestino = [];
 
-    document.querySelectorAll('#container-origem .linha-cargo-box').forEach(box => {
+    const processarLinha = (box, arrDesc, isOrigem) => {
         const info = extrairInfoLinha(box);
         if (info.valido) {
-            creditos += info.total;
+            if (isOrigem) creditos += info.total; else custos += info.total;
+            
             let vText = modoAtualGlobal === 'comissionado' ? (info.vinculo === 'puro' ? '(Puro)' : '(Efetivo)') : '';
+            let valUnit = formatarMoeda(info.valor);
             let valMes = formatarMoeda(info.total);
             let valAno = formatarMoeda(info.total * 12);
             
-            descOrigem.push(`
-                <li>
-                    <strong>${info.qtd}x</strong> ${info.nome} <span style="opacity:0.6; font-weight:normal; font-size:12px;">${vText}</span>
-                    <div style="color: var(--text-muted); font-family: 'Inter', sans-serif; font-variant-numeric: tabular-nums;">
-                        <span style="color: var(--text-main); font-weight: 600;">${valMes}</span> <span style="opacity:0.7; font-size:11px;">/mês</span> 
-                        <span style="opacity: 0.3; margin: 0 6px;">|</span> 
-                        <span style="color: var(--text-main); font-weight: 600;">${valAno}</span> <span style="opacity:0.7; font-size:11px;">/ano</span>
+            arrDesc.push(`
+                <li style="margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px dashed var(--border-color);">
+                    <div style="margin-bottom: 4px;">
+                        <strong>${info.qtd}x</strong> ${info.nome} <span style="opacity:0.6; font-weight:normal; font-size:12px;">${vText}</span>
+                    </div>
+                    <div style="color: var(--text-muted); font-family: 'Inter', sans-serif; font-variant-numeric: tabular-nums; font-size: 13px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                        <span style="background: rgba(0,0,0,0.05); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(0,0,0,0.05);">
+                            Unidade: <strong style="color: var(--text-main);">${valUnit}</strong>
+                        </span>
+                        <span>
+                            Total: <strong style="color: var(--text-main);">${valMes}</strong> <span style="opacity:0.7; font-size:11px;">/mês</span>
+                        </span>
+                        <span style="opacity: 0.3;">|</span>
+                        <span>
+                            <strong style="color: var(--text-main);">${valAno}</strong> <span style="opacity:0.7; font-size:11px;">/ano</span>
+                        </span>
                     </div>
                 </li>
             `);
         }
-    });
+    };
 
-    document.querySelectorAll('#container-destino .linha-cargo-box').forEach(box => {
-        const info = extrairInfoLinha(box);
-        if (info.valido) {
-            custos += info.total;
-            let vText = modoAtualGlobal === 'comissionado' ? (info.vinculo === 'puro' ? '(Puro)' : '(Efetivo)') : '';
-            let valMes = formatarMoeda(info.total);
-            let valAno = formatarMoeda(info.total * 12);
-            
-            descDestino.push(`
-                <li>
-                    <strong>${info.qtd}x</strong> ${info.nome} <span style="opacity:0.6; font-weight:normal; font-size:12px;">${vText}</span>
-                    <div style="color: var(--text-muted); font-family: 'Inter', sans-serif; font-variant-numeric: tabular-nums;">
-                        <span style="color: var(--text-main); font-weight: 600;">${valMes}</span> <span style="opacity:0.7; font-size:11px;">/mês</span> 
-                        <span style="opacity: 0.3; margin: 0 6px;">|</span> 
-                        <span style="color: var(--text-main); font-weight: 600;">${valAno}</span> <span style="opacity:0.7; font-size:11px;">/ano</span>
-                    </div>
-                </li>
-            `);
-        }
-    });
+    document.querySelectorAll('#container-origem .linha-cargo-box').forEach(box => processarLinha(box, descOrigem, true));
+    document.querySelectorAll('#container-destino .linha-cargo-box').forEach(box => processarLinha(box, descDestino, false));
 
     if (descOrigem.length === 0 && descDestino.length === 0) {
         mostrarToast("Preencha ao menos um cargo/função para salvar.", "warning");
