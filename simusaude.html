@@ -114,8 +114,15 @@
 
         .hidden { display: none !important; }
         
+        /* Estilos do Footer Atualizados */
+        .footer-container { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; gap: 1rem; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+        .footer-logos { display: flex; justify-content: center; align-items: center; gap: 2.5rem; }
+        .footer-logo { max-height: 55px; width: auto; object-fit: contain; }
+        .footer-text { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px; }
+
         @media (max-width: 768px) {
             .container { grid-template-columns: 1fr; }
+            .footer-logos { flex-direction: column; gap: 1.5rem; }
         }
     </style>
 </head>
@@ -141,7 +148,7 @@
                     <input type="checkbox" id="vinculoToggle" onchange="toggleVinculo()">
                     <span class="slider"></span>
                 </label>
-                <span class="toggle-label" id="labelComissionado" onclick="setVinculo('comissionado')">Comissionado Puro</span>
+                <span class="toggle-label" id="labelComissionado" onclick="setVinculo('comissionado')">Comissionado</span>
             </div>
 
             <!-- Campos Efetivo -->
@@ -295,7 +302,7 @@
                     <strong>Sugestão Estratégica:</strong> O valor do seu reembolso atual é igual à mensalidade total. Como os limites institucionais (10% e Teto das Faixas Etárias) são maiores, há margem para migrar para um plano de categoria superior sem impacto financeiro direto.
                 </div>
 
-                <!-- NOVO BOTÃO DE LINK PARA O PDF DA UNIMED COM A NOTA -->
+                <!-- BOTÃO DE LINK PARA O PDF DA UNIMED COM A NOTA -->
                 <a href="https://www.anserjufe.org.br/assets/pdfs/saude_unimed_recife.pdf" target="_blank" class="btn-outline">Consultar tabela Unimed - Anserjuf</a>
                 <p style="text-align: center; font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">*para outros valores, consulte seu plano</p>
 
@@ -384,6 +391,16 @@
                 </div>
             </div>
         </div>
+        
+        <!-- FOOTER ATUALIZADO -->
+        <div class="footer-container">
+            <div class="footer-logos">
+                <img src="https://i.ibb.co/FkLCjrFV/Capturar-removebg-preview-1.png" class="footer-logo" alt="Logo SGP"> 
+                <img src="https://i.ibb.co/yc32bwv5/Logo-DGF-upscaled-Photoroom.png" class="footer-logo" alt="Logo DGF">
+            </div>
+            <div class="footer-text">DGF-NUGOV-2026</div>
+        </div>
+
     </div>
 
     <script>
@@ -836,7 +853,7 @@
                     boxTotal.classList.remove('hidden');
                     
                     let motivos = [];
-                    if (idadeTitular > 49) motivos.push("Idade > 50");
+                    if (idadeTitular > 49) motivos.push("Idade > 49");
                     if (temDoencaGraveGeral) motivos.push("Doença Grave");
                     document.getElementById('motivoAdicional').textContent = `Motivo: ${motivos.join(' e ')}`;
                     
